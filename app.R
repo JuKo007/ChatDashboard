@@ -178,6 +178,44 @@ waiting_screen2 <- tagList(
 
 ###################################################################################### SHINY SERVER UI #####
 
+# Shared GESIS styling for the authenticated app and the login screen.
+gesis_page_styles <- tagList(
+  tags$link(rel = "stylesheet", href = "package/dist/gesis-web.css"),
+  tags$style(HTML("
+    .page-banner.microsite {
+      background: url('banner-microsite-07.svg') center/cover no-repeat;
+      min-height: 180px;
+      margin-bottom: 0 !important;
+    }
+    .page-banner.microsite .page-banner--inner {
+      background: transparent !important;
+      min-height: inherit;
+      overflow-wrap: anywhere;
+    }
+
+    footer.page-footer {
+      position: static;
+      clear: both;
+      overflow-wrap: anywhere;
+    }
+    footer.page-footer .page-footer--inner > * {
+      min-width: 0;
+    }
+    footer.page-footer .social-media-icons,
+    footer.page-footer nav.footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .25rem .5rem;
+    }
+    footer.page-footer .leibniz-logo-wrapper img {
+      height: auto;
+    }
+  "))
+)
+
+gesis_footer <- includeHTML("www/gesis-footer.html")
+
 # Define UI for ChatDashboard application
 app_ui <- fluidPage(theme = shinytheme("flatly"),
                     
@@ -239,9 +277,8 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                     setBackgroundColor("#ffffff"),
                     useWaiter(),
                     
-                    # GESIS framework + fixes (fileInput, footer spacing, banner/nav styling)
                     tags$head(
-                      tags$link(rel = "stylesheet", href = "package/dist/gesis-web.css"),
+                      gesis_page_styles,
                       tags$style(HTML("
                     /* ---------- FILE INPUT (Bootstrap 3) ---------- */
                     .bs3-fileinput .input-group { display: table !important; width: 100% !important; border-collapse: separate; }
@@ -274,25 +311,9 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                     /* ShinyAlerts: prevent stray text input */
                     .swal2-popup .swal2-input{display:none!important;}
               
-                    /* ---------- LAYOUT / FOOTER SPACING ---------- */
-                    html, body { height: 100%; }
-                    body { display:flex; flex-direction:column; }
-                    .navbar { flex:0 0 auto; }
-                    .container-fluid { flex:1 0 auto; }
-                    footer { flex:0 0 auto; }
-                    .tab-content { padding-bottom:3rem; } /* breathing room above footer */
-              
-                    /* DataTables length <select> visible */
-                    .dataTables_length select { display:inline-block; }
-              
-                    /* ---------- MICROSITE BANNER ---------- */
-                    .page-banner.microsite{
-                      background-image:url('banner-microsite-07.svg') !important;
-                      background-repeat:no-repeat !important; background-size:cover !important; background-position:center !important;
-                      min-height:180px; margin-bottom:0 !important; /* no white gap under banner */
-                    }
-                    .page-banner.microsite .page-banner--inner{ background:transparent !important; }
-              
+                    .tab-content { padding-bottom: 3rem; }
+                    .dataTables_length select { display: inline-block; }
+
                     /* ---------- MICROSITE NAV (full width, dark, GESIS colors) ---------- */
                     .gs-micro-nav.has-bg-color{
                       background-color: var(--gs-darkblue-100,#072f57) !important;
@@ -1051,8 +1072,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                # End navbarpage
                     ),
                     
-                    # Add GESIs footer
-                    tags$footer(includeHTML("www/gesis-footer.html"))
+                    gesis_footer
                     
                     # End ui
 )
@@ -1065,68 +1085,28 @@ ui <- shinymanager::secure_app(
   language = landing_page_language,
   
   head_auth = tagList(
-    tags$link(rel = "stylesheet", href = "package/dist/gesis-web.css"),
+    gesis_page_styles,
     tags$style(HTML("
-  :root{
-    --header-h:64px;
-    --banner-h:180px;
-    --gap-top:0px;
-  }
-
-  /* Fixed micro header */
-  #gesis-micro-header{ position:fixed; top:0; left:0; right:0; z-index:1030; }
-
-  /* Full-width banner behind login */
-  .panel-auth::before{
-    content:''; position:fixed; top:var(--header-h); left:0; right:0; height:var(--banner-h);
-    background:url('banner-microsite-07.svg') center/cover no-repeat; z-index:1020;
-  }
-
-  /* Auth wrapper spacing */
-  .panel-auth{
-    padding-top:calc(var(--header-h) + var(--banner-h) + var(--gap-top)) !important;
-    box-sizing:border-box;
-    min-height:100dvh;
-  }
-
-  /* Keep login card constrained and centered */
-  .panel-auth > .panel,
-  .panel-auth .panel.panel-default,
-  .panel-auth .auth-panel{
-    width:min(560px, 100%);
-    margin:0 auto;
-  }
-
-  /* Banner title/logo overlay */
-  #banner-overlay{ position:fixed; top:var(--header-h); left:0; right:0; height:var(--banner-h); z-index:1025; pointer-events:none; }
-  #banner-overlay .page-banner.microsite,
-  #banner-overlay .page-banner--inner{ background:transparent !important; margin:0 !important; }
-
-  html,body{ height:100%; overflow-x:hidden; }
-
-  /* Disable footer on shinymanager login page */
-  .page-footer{ display:none !important; }
-
-  @media (max-width:768px){
-    :root{ --banner-h:140px; --gap-top:40px; }
-  }
-"))
-    
-    
-
-    
-    
+      .panel-auth #gesis-micro-header,
+      .panel-auth #gesis-micro-header > * {
+        position: static;
+      }
+      .panel-auth > .panel,
+      .panel-auth .panel.panel-default,
+      .panel-auth .auth-panel {
+        box-sizing: border-box;
+        width: min(560px, calc(100% - 2rem));
+        margin: 1.5rem auto;
+      }
+    "))
   ),
-  
+
   tags_top = tagList(
     tags$div(id = "gesis-micro-header", includeHTML("www/gesis-micro-header.html")),
-    tags$div(id = "banner-overlay", includeHTML("www/gesis-microsite-banner.html"))
+    includeHTML("www/gesis-microsite-banner.html")
   ),
-  
-  tags_bottom = tagList(
-    #includeHTML("<br><br><br><br>"),
-    includeHTML("www/gesis-footer.html")  # no wrapper; the file already has <footer class="page-footer">
-  )
+
+  tags_bottom = gesis_footer
 )
 
 
