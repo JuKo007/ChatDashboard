@@ -16,28 +16,30 @@ parse_export <- function(upload, settings) {
   )
 }
 
-serialize_donation <- function(chat, pick, path) {
-  allowed <- c("DateTime", "Sender_anon", "Emoji", "EmojiDescriptions", "Smilies", "TokCount")
-  stopifnot(length(pick$columns) > 0L, all(pick$columns %in% allowed),
+preview_json <- function(chat, display_names) {
+  stopifnot(length(display_names) == ncol(chat), !anyDuplicated(display_names))
+  preview <- chat
+  names(preview) <- display_names
+  jsonlite::toJSON(preview, dataframe = "rows", na = "null", POSIXt = "ISO8601")
+}
+
+serialize_donation <- function(chat, pick, settings, path) {
+  stopifnot(length(settings$fields) == ncol(chat), !anyDuplicated(settings$fields),
             length(pick$rows) > 0L, all(pick$rows %in% seq_len(nrow(chat))),
             grepl("^Person_[0-9]+$", pick$alias),
             pick$alias %in% as.character(chat$Sender_anon))
 
-  # Construct a new data frame to avoid carrying parser attributes or original row IDs.
-  columns <- lapply(pick$columns, function(name) {
-    values <- chat[[name]][pick$rows]
-    if (name == "DateTime") return(as.POSIXct(as.numeric(values), origin = "1970-01-01", tz = "UTC"))
-    if (name == "TokCount") return(as.numeric(values))
-    if (name == "Sender_anon") {
-      aliases <- as.character(values)
-      aliases[!is.na(aliases) & !grepl("^Person_[0-9]+$", aliases)] <- NA_character_
-      return(aliases)
-    }
-    I(lapply(values, as.character))
-  })
-  names(columns) <- pick$columns
-  subset <- as.data.frame(columns, stringsAsFactors = FALSE)
+  parser_metadata <- attributes(chat)[c("parsedAt", "language", "detectedOS")]
+  names(chat) <- settings$fields
+  columns <- setdiff(intersect(pick$columns, names(chat)), settings$excluded)
+  stopifnot(length(columns) > 0L)
+  subset <- chat[pick$rows, columns, drop = FALSE]
+
   attr(subset, "donor") <- pick$alias
-  attr(subset, "study_id") <- pick$studyId
+  for (name in names(parser_metadata)) {
+    attr(subset, name) <- parser_metadata[name]
+  }
+  attr(subset, "clientOS") <- settings$clientOS
+  attr(subset, "clientDevice") <- settings$clientDevice
   saveRDS(subset, path)
 }

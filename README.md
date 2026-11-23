@@ -10,7 +10,7 @@ device.
 Install the server dependencies in R:
 
 ```r
-install.packages(c("shiny", "shinymanager", "shinythemes", "htmltools", "jsonlite", "digest"))
+install.packages(c("shiny", "shinymanager", "shinythemes", "htmltools", "jsonlite", "digest", "shinybrowser"))
 ```
 
 Configure `credentials.rds` at the repository root as a shinymanager credential

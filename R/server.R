@@ -22,7 +22,10 @@ server <- function(input, output, session) {
     }
     tags$div(
       id = "study-browser-config", hidden = NA,
-      `data-study-id` = auth$user,
+      `data-fields` = jsonlite::toJSON(Colnames_ppt_display),
+      `data-excluded` = jsonlite::toJSON(Colnames_exclude_pii),
+      `data-client-os` = jsonlite::toJSON(shinybrowser::get_os(), null = "null"),
+      `data-client-device` = jsonlite::toJSON(shinybrowser::get_device(), null = "null"),
       `data-consent` = if (is.na(consent_message)) "" else consent_message,
       `data-save` = if (save_to_server) "yes" else "no",
       `data-public-key` = public_key
@@ -49,7 +52,7 @@ server <- function(input, output, session) {
       # Rebuild the envelope so only the expected fields can be persisted.
       envelope <- list(version = 1L, nonce = envelope$nonce,
                        wrappedKey = envelope$wrappedKey, ciphertext = envelope$ciphertext)
-      persist_envelope(envelope)
+      persist_envelope(envelope, auth$user)
       reply(TRUE)
     }, error = function(error) {
       warning("Could not persist encrypted donation.", call. = FALSE)
@@ -66,11 +69,16 @@ valid_base64 <- function(value, min_length, max_length) {
     grepl("^[A-Za-z0-9+/]+={0,2}$", value, perl = TRUE)
 }
 
-persist_envelope <- function(envelope) {
+persist_envelope <- function(envelope, participant_id) {
   dir.create("UserData", showWarnings = FALSE, mode = "0700")
   text <- jsonlite::toJSON(envelope, auto_unbox = TRUE)
-  target <- file.path("UserData", paste0(digest::digest(as.character(text), algo = "sha256"), ".json"))
-  if (file.exists(target)) return(invisible(NULL))
+  safe_id <- utils::URLencode(participant_id, reserved = TRUE, repeated = TRUE)
+  fingerprint <- digest::digest(as.character(text), algo = "sha256")
+  existing <- list.files("UserData", pattern = paste0("_", fingerprint, "[.]json$"))
+  if (any(startsWith(existing, paste0(safe_id, "_")))) return(invisible(NULL))
+
+  target <- file.path("UserData", sprintf("%s_%s_%s.json", safe_id,
+                    format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), fingerprint))
 
   temp <- tempfile(".donation-", tmpdir = "UserData")
   on.exit(unlink(temp), add = TRUE)

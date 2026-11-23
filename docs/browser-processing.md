@@ -39,20 +39,25 @@ Forwarding requires a matching `?id=...` and password. Without the environment
 variable, preset logins remain available.
 
 The app writes versioned JSON envelopes in `UserData/`. It atomically renames
-a temporary file and derives the filename from the envelope, so retrying the same
-encrypted submission does not create a duplicate. The authenticated study ID
-and sender alias are inside the encrypted RDS. With `save_to_server <- FALSE`
-the local review runs and the app never sends a donation.
+a temporary file and uses the participant ID, timestamp, and an encrypted
+envelope fingerprint in the filename. The participant ID stays in the filename,
+as in the original app. After offline decryption, the RDS data frame uses the
+same display column names and attributes as before, including `donor`,
+`parsedAt`, `language`, `detectedOS`, `clientOS`, and `clientDevice`.
+With `save_to_server <- FALSE` the local review and charts still run and
+the app never sends a donation.
 
-## Review scope
+## Configure fields and review
 
-The participant can preview messages and choose rows and fields. The current
-donation allowlist consists of timestamps, sender aliases, emoji, emoji
-descriptions, smileys, and word counts. The app omits names, message text, links,
-locations, media, system-message text, and original row numbering. Sender aliases
-are pseudonyms. Timestamps and the encrypted study ID may still permit linkage.
-The browser workflow currently offers a local summary of row and word counts
-instead of the legacy server-rendered dashboard.
+Researchers control the available fields and donation exclusions in `R/setup.R`.
+`Colnames_ppt_display` maps the parser's columns in their original order.
+`Colnames_exclude_pii` identifies columns that may appear in the participant
+preview but must be removed before donation. The browser applies that exclusion
+again when writing the selected rows and columns to RDS.
+
+All 14 original charts run locally in webR from the full parsed chat with the
+original WhatsR chart functions. Sender, date range, and applicable frequency
+filters operate in the browser. The chart data and images are never submitted.
 
 The server validates the envelope shape and stores ciphertext without a private
 key. This protects against disclosure from the donation store and from the
@@ -74,7 +79,7 @@ has not changed the code.
   retrying a failed save. Verify no file, filename, names, or excluded content
   leaves the browser. Verify there is no upload request, including in no-save mode.
 - Decrypt the resulting donation and check that it contains exactly the approved
-  rows and fields and no original row identifiers. Check that the server has only
+  rows and fields with the original field names, row names, and metadata. Check that the server has only
   the encrypted envelope and public key. Test an unavailable runtime and key,
   no-save mode, and mobile browsers over HTTPS.
 

@@ -1,5 +1,5 @@
 import { encryptDonation } from "./donation-crypto.mjs";
-import { fields, selection } from "./donation-selection.mjs";
+import { donatableFields, selection } from "./donation-selection.mjs";
 
 const el = id => document.getElementById("browser-" + id);
 const pageSize = 25;
@@ -34,9 +34,11 @@ async function boot() {
   try {
     await runtime.init();
     await runtime.installPackages(["WhatsR", "jsonlite"]);
-    const response = await fetch(new URL("./browser-parser.R", import.meta.url));
-    if (!response.ok) throw new Error("Parser script unavailable.");
-    await runtime.evalRVoid(await response.text());
+    for (const script of ["browser-parser.R", "browser-charts.R"]) {
+      const response = await fetch(new URL("./" + script, import.meta.url));
+      if (!response.ok) throw new Error("Browser script unavailable.");
+      await runtime.evalRVoid(await response.text());
+    }
     return runtime;
   } catch (error) {
     runtime.close();
@@ -44,7 +46,16 @@ async function boot() {
   }
 }
 
-const settings = () => document.getElementById("study-browser-config")?.dataset;
+function settings() {
+  const data = document.getElementById("study-browser-config")?.dataset;
+  if (!data) return undefined;
+  return { ...data,
+    fields: JSON.parse(data.fields),
+    excluded: JSON.parse(data.excluded),
+    clientOS: JSON.parse(data.clientOs),
+    clientDevice: JSON.parse(data.clientDevice),
+  };
+}
 const rJsonFile = async (path, value) => {
   await webR.FS.writeFile(path, new TextEncoder().encode(JSON.stringify(value)));
 };
@@ -69,19 +80,18 @@ el("parse").addEventListener("click", async () => {
       return;
     }
     await rJsonFile("/study-settings.json", {
-      platform: el("platform").value, language: el("language").value, consent: config.consent,
+      platform: el("platform").value, language: el("language").value, consent: config.consent, fields: config.fields,
     });
     await webR.FS.writeFile(path, new Uint8Array(await file.arrayBuffer()));
     rows = JSON.parse(await webR.evalRString(`
-      chat <- parse_export("${path}", jsonlite::fromJSON("/study-settings.json"))
+      config <- jsonlite::fromJSON("/study-settings.json")
+      chat <- parse_export("${path}", config)
       if (!nrow(chat)) stop("Empty chat.")
-      preview <- chat[, c("DateTime", "Sender", "Sender_anon", "Emoji", "EmojiDescriptions",
-                          "Smilies", "TokCount", "Message"), drop = FALSE]
-      jsonlite::toJSON(preview, dataframe = "rows", na = "null", POSIXt = "ISO8601")
+      preview_json(chat, config$fields)
     `));
     await webR.FS.unlink(path);
     await webR.FS.unlink("/study-settings.json");
-    await webR.evalRVoid('unlink(file.path(tempdir(), "whatsr_zip"), recursive = TRUE); rm(preview)');
+    await webR.evalRVoid('unlink(file.path(tempdir(), "whatsr_zip"), recursive = TRUE); rm(config)');
     renderPeople();
     included = new Set(rows.map((_, index) => index));
     picker.value = "";
@@ -107,8 +117,9 @@ function element(tag, text) {
 }
 
 function renderPeople() {
-  const people = new Map(rows.filter(row => /^Person_[0-9]+$/.test(row.Sender_anon))
-    .map(row => [row.Sender_anon, row.Sender]));
+  const [, displayName, displayAlias] = settings().fields;
+  const people = new Map(rows.filter(row => /^Person_[0-9]+$/.test(row[displayAlias]))
+    .map(row => [row[displayAlias], row[displayName]]));
   if (!people.size) throw new Error("No participants.");
   alias = "";
   el("next").disabled = true;
@@ -142,16 +153,22 @@ function selectedFields() {
 }
 
 function updateCount() {
-  el("count").textContent = included.size + " Zeilen · " + selectedFields().length + " Merkmale";
+  const config = settings();
+  if (!config) return;
+  const count = donatableFields(selectedFields(), config.fields, config.excluded).length;
+  el("count").textContent = included.size + " Zeilen · " + count + " spendbare Merkmale";
 }
 
 function renderTable() {
   const columns = selectedFields();
+  const config = settings();
+  if (!config) return;
   const header = element("thead");
   const heading = element("tr");
-  for (const name of ["Spenden", ...columns.map(key => fields[key]), "Nachricht (nur Vorschau)"]) {
+  for (const name of ["Spenden", ...columns]) {
     const cell = element("th", name);
     cell.scope = "col";
+    if (config.excluded.includes(name)) cell.classList.add("study-preview-only");
     heading.append(cell);
   }
   header.append(heading);
@@ -169,16 +186,19 @@ function renderTable() {
       updateCount();
     });
     td.append(checkbox);
-    tr.append(td, ...columns.map(key => element("td", (Array.isArray(row[key]) ?
-      row[key].filter(value => value != null).join(", ") : row[key]) ?? "")));
-    const message = row.Message ?? "";
-    const preview = element("td");
-    if (message.length > 100) {
-      const details = element("details");
-      details.append(element("summary", message.slice(0, 90) + "…"), element("p", message));
-      preview.append(details);
-    } else preview.textContent = message;
-    tr.append(preview);
+    tr.append(td);
+    for (const key of columns) {
+      const cell = element("td");
+      if (config.excluded.includes(key)) cell.classList.add("study-preview-only");
+      const value = Array.isArray(row[key]) ? row[key].filter(item => item != null).join(", ") : row[key];
+      const display = value == null ? "" : String(value);
+      if (Array.from(display).length > 100) {
+        const details = element("details");
+        details.append(element("summary", Array.from(display).slice(0, 90).join("") + "…"), element("p", display));
+        cell.append(details);
+      } else cell.textContent = display;
+      tr.append(cell);
+    }
     body.append(tr);
   });
   el("table").replaceChildren(header, body);
@@ -189,15 +209,18 @@ function renderTable() {
 }
 
 el("next").addEventListener("click", () => {
-  if (!alias) return;
+  const config = settings();
+  if (!alias || !config) return;
   el("columns").replaceChildren();
-  for (const [key, title] of Object.entries(fields)) {
+  for (const key of config.fields) {
     const label = element("label"), input = element("input");
     input.type = "checkbox";
     input.value = key;
-    input.checked = true;
+    const excluded = config.excluded.includes(key);
+    input.checked = !excluded;
+    if (excluded) label.classList.add("study-preview-only");
     input.addEventListener("change", renderTable);
-    label.append(input, document.createTextNode(title));
+    label.append(input, document.createTextNode(key));
     el("columns").append(label);
   }
   page = 0;
@@ -207,22 +230,26 @@ el("next").addEventListener("click", () => {
 el("prev-page").addEventListener("click", () => { page--; renderTable(); });
 el("next-page").addEventListener("click", () => { page++; renderTable(); });
 el("donate").addEventListener("click", () => {
-  if (!included.size || !selectedFields().length) return status("Wählen Sie Zeilen und Merkmale aus.");
-  el("confirm-text").textContent = included.size + " Zeilen und " + selectedFields().length + " Merkmale.";
+  const config = settings();
+  if (!config) return status("Ihre Sitzung ist abgelaufen.");
+  const count = donatableFields(selectedFields(), config.fields, config.excluded).length;
+  if (!included.size || !count) return status("Wählen Sie Zeilen und spendbare Merkmale aus.");
+  el("confirm-text").textContent = included.size + " Zeilen und " + count +
+    " spendbare Merkmale. Grau markierte Merkmale bleiben in der Vorschau.";
   el("send").textContent = settings()?.save === "no" ? "Zur Auswertung" : "Daten spenden";
   el("confirm").showModal();
 });
 el("cancel").addEventListener("click", () => el("confirm").close());
 
 function finish() {
-  const count = included.size;
-  const total = [...included].reduce((sum, i) => sum + (Number(rows[i].TokCount) || 0), 0);
+  clearTimeout(receiptTimer);
+  if (el("confirm").open) el("confirm").close();
   const donated = settings()?.save === "yes";
-  destroyChat();
-  el("totals").replaceChildren(element("dt", "Ausgewählte Zeilen"), element("dd", count),
-    element("dt", "Wörter in diesen Zeilen"), element("dd", total));
+  pendingEnvelope = undefined;
+  initCharts();
   show("results");
   status(donated ? "Die verschlüsselte Auswahl wurde gespeichert." : "Ihre Auswahl wurde nicht gespeichert.");
+  void drawCharts();
 }
 
 el("send").addEventListener("click", async () => {
@@ -237,10 +264,14 @@ el("send").addEventListener("click", async () => {
   el("donate").disabled = true;
   try {
     if (!pendingEnvelope) {
-      const pick = selection(rows, included, selectedFields(), alias, config.studyId);
-      await rJsonFile("/study-selection.json", pick);
+      const pick = selection(rows, included, selectedFields(), alias, config);
       try {
-        await webR.evalRVoid('serialize_donation(chat, jsonlite::fromJSON("/study-selection.json"), "/subset.rds")');
+        await rJsonFile("/study-selection.json", pick);
+        await rJsonFile("/study-schema.json", {
+          fields: config.fields, excluded: config.excluded,
+          clientOS: config.clientOS, clientDevice: config.clientDevice,
+        });
+        await webR.evalRVoid('serialize_donation(chat, jsonlite::fromJSON("/study-selection.json"), jsonlite::fromJSON("/study-schema.json"), "/subset.rds")');
         const subset = await webR.FS.readFile("/subset.rds");
         if (subset.byteLength > 17 * 1024 ** 2) throw new Error("Selection too large.");
         const key = Uint8Array.from(atob(config.publicKey), character => character.charCodeAt(0));
@@ -250,7 +281,7 @@ el("send").addEventListener("click", async () => {
         el("prev-page").disabled = true;
         el("next-page").disabled = true;
       } finally {
-        await webR.evalRVoid('unlink(c("/study-selection.json", "/subset.rds"))');
+        await webR.evalRVoid('unlink(c("/study-selection.json", "/study-schema.json", "/subset.rds"))');
       }
     }
     if (!awaitingReceipt) {
@@ -290,5 +321,141 @@ function destroyChat() {
   el("columns").inert = false;
   el("donate").disabled = false;
 }
-el("clear").addEventListener("click", () => { destroyChat(); el("totals").replaceChildren(); show("open"); status(""); });
+el("clear").addEventListener("click", () => { destroyChat(); el("charts").replaceChildren(); el("chart-senders").replaceChildren(); show("open"); status(""); });
 window.addEventListener("pagehide", event => { if (!event.persisted) destroyChat(); });
+
+const charts = {
+  messages: ["message1", "tokensbwah1", "tokensbwah2"],
+  links: ["links4", "links2", "links1"],
+  smilies: ["smilies4", "smilies2", "smilies1"],
+  emoji: ["emoji4", "emoji2", "emoji1"],
+  replies: ["replytime1", "replytime2"],
+};
+const minimums = { links: 5, smilies: 5, emoji: 50 };
+const chartFilters = new Map();
+let drawing = false;
+let redraw = false;
+
+function initCharts() {
+  const [timestamp, sender] = settings().fields;
+  const dates = rows.map(row => String(row[timestamp] ?? "").slice(0, 10))
+    .filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
+  const senders = [...new Set(rows.map(row => row[sender]))]
+    .filter(name => name && name !== "WhatsApp System Message");
+  chartFilters.clear();
+  el("chart-senders").replaceChildren();
+  for (const name of senders) {
+    const checkbox = element("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = true;
+    // Assign the real name as text. It never becomes a Shiny input ID or value.
+    const label = element("label");
+    label.append(checkbox, document.createTextNode(name));
+    el("chart-senders").append(label);
+  }
+  for (const group of Object.keys(charts)) {
+    chartFilters.set(group, {
+      start: dates[0] ?? "", end: dates.at(-1) ?? "",
+      senders: senders.map(() => true), minimum: minimums[group] ?? 1,
+    });
+  }
+  el("chart-group").value = "messages";
+  activeChartGroup = "messages";
+  showChartFilters();
+}
+
+let activeChartGroup = "messages";
+function readChartFilters() {
+  return {
+    start: el("chart-start").value,
+    end: el("chart-end").value,
+    senders: [...el("chart-senders").querySelectorAll("input")].map(input => input.checked),
+    minimum: Number(el("chart-minimum").value) || 1,
+  };
+}
+
+function showChartFilters() {
+  const filter = chartFilters.get(activeChartGroup);
+  el("chart-start").value = filter.start;
+  el("chart-end").value = filter.end;
+  el("chart-minimum").value = filter.minimum;
+  el("minimum-label").hidden = !Object.hasOwn(minimums, activeChartGroup);
+  el("chart-senders").querySelectorAll("input").forEach((input, i) => {
+    input.checked = filter.senders[i];
+  });
+}
+
+el("chart-group").addEventListener("change", () => {
+  chartFilters.set(activeChartGroup, readChartFilters());
+  activeChartGroup = el("chart-group").value;
+  showChartFilters();
+  void drawCharts();
+});
+for (const id of ["chart-start", "chart-end", "chart-minimum", "chart-senders"]) {
+  el(id).addEventListener("change", () => void drawCharts());
+}
+
+async function drawCharts() {
+  if (!webR || el("results").hidden) return;
+  if (drawing) { redraw = true; return; }
+  drawing = true;
+  const runtime = webR;
+  const group = activeChartGroup;
+  const filter = readChartFilters();
+  filter.senders = [...el("chart-senders").querySelectorAll("label")]
+    .filter((_, i) => filter.senders[i]).map(label => label.textContent);
+  const output = el("charts");
+  output.replaceChildren();
+  const setStatus = text => { el("chart-status").textContent = text; };
+  let shelter;
+  try {
+    if (!filter.senders.length || !filter.start || !filter.end || filter.start > filter.end) {
+      setStatus("Wählen Sie mindestens einen Absender und einen gültigen Zeitraum aus.");
+      return;
+    }
+    setStatus("Diagramme werden in Ihrem Browser berechnet …");
+    shelter = await new runtime.Shelter();
+    const width = Math.round(Math.min(1050, Math.max(420, output.clientWidth)));
+    for (const chart of charts[group]) {
+      if (runtime !== webR || redraw) break;
+      await rJsonFile("/chart-filters.json", { ...filter, chart, width });
+      try {
+        const capture = await shelter.captureR(`
+          local({
+            filters <- jsonlite::fromJSON("/chart-filters.json")
+            webr::canvas(width = filters$width, height = 480, capture = TRUE)
+            tryCatch(print(legacy_chart(filters$chart, chat, filters)),
+                     finally = grDevices::dev.off())
+          })
+        `);
+        for (const image of capture.images) {
+          if (runtime === webR && !redraw) {
+            const canvas = element("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.style.maxWidth = "100%";
+            canvas.style.height = "auto";
+            canvas.setAttribute("role", "img");
+            canvas.setAttribute("aria-label", el("chart-group").selectedOptions[0].textContent);
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            output.append(canvas);
+          }
+          image.close();
+        }
+      } catch {
+        if (runtime === webR && !redraw) output.append(element("p", "Für dieses Diagramm konnten keine Daten dargestellt werden."));
+      } finally {
+        await shelter.purge();
+      }
+    }
+    if (runtime === webR && !redraw) setStatus("");
+  } catch {
+    if (runtime === webR) setStatus("Die Diagramme konnten nicht berechnet werden.");
+  } finally {
+    if (runtime === webR) {
+      await runtime.evalRVoid('unlink("/chart-filters.json")').catch(() => {});
+    }
+    drawing = false;
+    if (redraw) { redraw = false; void drawCharts(); }
+  }
+}

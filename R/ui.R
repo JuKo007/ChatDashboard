@@ -6,6 +6,7 @@ gesis_footer <- includeHTML("www/gesis-footer.html")
 
 app_ui <- fluidPage(
   theme = shinytheme("flatly"),
+  shinybrowser::detect(),
   tags$head(
     gesis_page_styles,
     tags$link(rel = "stylesheet", href = "css/browser-study.css"),
@@ -60,7 +61,7 @@ app_ui <- fluidPage(
       tags$section(
         class = "study-main", id = "browser-review", hidden = NA,
         tags$h2("Datenspende prüfen"),
-        tags$p("Markieren Sie die Zeilen und Merkmale, die Sie spenden möchten. Die Nachrichtenvorschau dient nur der Orientierung."),
+        tags$p("Markieren Sie die Zeilen und Merkmale, die Sie spenden möchten. Grau markierte Merkmale dienen nur der Vorschau."),
         tags$fieldset(tags$legend("Merkmale"), tags$div(id = "browser-columns")),
         tags$p(id = "browser-count", role = "status"),
         tags$div(class = "browser-table-scroll", tabindex = "0",
@@ -80,8 +81,23 @@ app_ui <- fluidPage(
       tags$section(
         class = "study-main", id = "browser-results", hidden = NA,
         tags$h2("Ihre Chatstatistik"),
-        tags$p("Diese Übersicht wird aus Ihrer Auswahl berechnet."),
-        tags$dl(id = "browser-totals"),
+        tags$p("Die Diagramme werden in Ihrem Browser aus dem eingelesenen Chat berechnet."),
+        tags$div(
+          class = "browser-study-fields",
+          tags$label("Auswertung", tags$select(id = "browser-chart-group",
+            tags$option(value = "messages", "Nachrichten"),
+            tags$option(value = "links", "Links"),
+            tags$option(value = "smilies", "Smilies"),
+            tags$option(value = "emoji", "Emoji"),
+            tags$option(value = "replies", "Antwortzeiten"))),
+          tags$label("Von", tags$input(id = "browser-chart-start", type = "date")),
+          tags$label("Bis", tags$input(id = "browser-chart-end", type = "date")),
+          tags$label(id = "browser-minimum-label", hidden = NA, "Mindesthäufigkeit",
+                     tags$input(id = "browser-chart-minimum", type = "number", min = "1", max = "100"))
+        ),
+        tags$fieldset(tags$legend("Absender"), tags$div(id = "browser-chart-senders")),
+        tags$p(id = "browser-chart-status", role = "status"),
+        tags$div(id = "browser-charts"),
         tags$button(id = "browser-clear", type = "button", class = "btn btn-default", "Chat schließen")
       ),
       tags$p(class = "browser-study-contact",

@@ -7,15 +7,25 @@ chat <- data.frame(
   TokCount = c(2, 999)
 )
 rownames(chat) <- c("1000", "2000")
-attr(chat, "private") <- "private attribute"
+attr(chat, "parsedAt") <- as.POSIXct("2025-01-03", tz = "UTC")
+attr(chat, "language") <- "german"
+attr(chat, "detectedOS") <- "android"
+settings <- list(fields = c("Zeit", "Absender", "Absender_anonym", "Nachricht", "Wortanzahl"),
+                 excluded = c("Absender", "Nachricht"), clientOS = "Windows", clientDevice = "Desktop")
+pick <- list(rows = 1L, columns = settings$fields, alias = "Person_1")
 path <- tempfile()
-pick <- list(rows = 1L, columns = c("Sender_anon", "TokCount"), alias = "Person_1", studyId = "test")
-serialize_donation(chat, pick, path)
+serialize_donation(chat, pick, settings, path)
 donation <- readRDS(path)
-stopifnot(identical(names(donation), pick$columns), nrow(donation) == 1L,
-          identical(rownames(donation), "1"), identical(donation$TokCount, 2),
+stopifnot(identical(names(donation), c("Zeit", "Absender_anonym", "Wortanzahl")),
+          identical(rownames(donation), "1000"), identical(donation$Wortanzahl, 2),
           identical(attr(donation, "donor"), "Person_1"),
-          is.null(attr(donation, "private")))
-pick$columns <- "Message"
-stopifnot(inherits(try(serialize_donation(chat, pick, path), silent = TRUE), "try-error"))
+          identical(attr(donation, "parsedAt"), attributes(chat)["parsedAt"]),
+          identical(attr(donation, "language"), attributes(chat)["language"]),
+          identical(attr(donation, "detectedOS"), attributes(chat)["detectedOS"]),
+          identical(attr(donation, "clientOS"), "Windows"),
+          identical(attr(donation, "clientDevice"), "Desktop"),
+          is.null(attr(donation, "study_id")))
+settings$excluded <- "Absender"
+serialize_donation(chat, pick, settings, path)
+stopifnot(identical(readRDS(path)$Nachricht, "private-text"))
 unlink(path)
