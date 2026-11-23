@@ -481,35 +481,22 @@ server <- function(input, output, session) {
       attr(rv$copy2, "clientOS")     <- shinybrowser::get_os()
       attr(rv$copy2, "clientDevice") <- shinybrowser::get_device()
       
-      # hashing to get a unique filename to not overwrite a file if the same person decides to upload multiple chats
-      LocalFilename <- sprintf("%s_%s_%s.rds",
-                               reactiveValuesToList(res_auth)$user,
-                               format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),   # safe for all OS
-                               digest(rv$copy2, algo = "sha512")
-      )
-      
-      # creating server keypair object from stored RSA keys
-      key_pair_Server <- cyphr::keypair_openssl(pub = "./ServerFolder", key = "./ServerFolder", envelope = TRUE)
-      
-      # encrypting object
-      rv$copy2_encrypted <- encrypt_object(rv$copy2,key_pair_Server)
-      
-      # only save if save_to_server == TRUE
-      if (save_to_server == TRUE) {
-        
-        # saving object to disk in encrypted form (This is specific to Linux servers, would need to be adapted on Windows - see below)
-        saveRDS(rv$copy2_encrypted,file = paste("./UserData/",LocalFilename, sep = ""))
-        
-        # saving object to disk in encrypted form (Windows)
-        # LocalFilename <- gsub(":","_",LocalFilename)
-        # saveRDS(rv$copy2_encrypted,file = paste(".//UserData//",LocalFilename, sep = ""))
-        
+      if (isTRUE(save_to_server)) {
+        filename <- sprintf(
+          "%s_%s_%s.rds",
+          reactiveValuesToList(res_auth)$user,
+          format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
+          digest(rv$copy2, algo = "sha512")
+        )
+        key_pair <- cyphr::keypair_openssl(
+          pub = "./ServerFolder", key = "./ServerFolder", envelope = TRUE
+        )
+        encrypted <- cyphr::encrypt_object(rv$copy2, key_pair)
+        saveRDS(encrypted, file = file.path("UserData", filename))
       }
-      
-      # removing copies from workspace by overwriting with NULL
+
       rv$copy2 <- NULL
-      rv$copy2_encrypted <- NULL
-      
+
       # waiter
       waiter_hide()
       
@@ -525,8 +512,17 @@ server <- function(input, output, session) {
       # NEW: Success popup
       shinyalert(
         inputId = "donation_success_alert",
-        title = "Spende erfolgreich!", # Or use a display_text variable
-        text = "Vielen Dank! Ihre anonymisierte Datenspende wurde sicher übermittelt. \n\n Auf der nächsten Seite sehen Sie einige Statistiken zu Ihrem Chatverhalten als zusätzliches Dankeschön für Ihre Teilnahme. Diese sind nur für Sie einsehbar und werden mit Verlassen der Seite restlos gelöscht. \n\n Sie können diese Website nun jederzeit schließen.",
+        title = if (isTRUE(save_to_server)) "Spende erfolgreich!" else "Auswahl abgeschlossen",
+        text = paste(
+          if (isTRUE(save_to_server)) {
+            "Vielen Dank! Ihre anonymisierte Datenspende wurde sicher übermittelt."
+          } else {
+            "Ihre Auswahl wurde nicht gespeichert."
+          },
+          "Auf der nächsten Seite sehen Sie Statistiken zu Ihrem Chatverhalten.",
+          "Sie können diese Website nun jederzeit schließen.",
+          sep = "\n\n"
+        ),
         type = "success",
         showConfirmButton = TRUE,
         confirmButtonText = "Weiter",
