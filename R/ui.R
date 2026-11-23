@@ -1,40 +1,13 @@
 ###################################################################################### SHINY SERVER UI #####
 
-# Shared GESIS styling for the authenticated app and the login screen.
 gesis_page_styles <- tagList(
   tags$link(rel = "stylesheet", href = "package/dist/gesis-web.css"),
-  tags$style(HTML("
-    .page-banner.microsite {
-      background: url('banner-microsite-07.svg') center/cover no-repeat;
-      min-height: 180px;
-      margin-bottom: 0 !important;
-    }
-    .page-banner.microsite .page-banner--inner {
-      background: transparent !important;
-      min-height: inherit;
-      overflow-wrap: anywhere;
-    }
-
-    footer.page-footer {
-      position: static;
-      clear: both;
-      overflow-wrap: anywhere;
-    }
-    footer.page-footer .page-footer--inner > * {
-      min-width: 0;
-    }
-    footer.page-footer .social-media-icons,
-    footer.page-footer nav.footer {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: .25rem .5rem;
-    }
-    footer.page-footer .leibniz-logo-wrapper img {
-      height: auto;
-    }
-  "))
+  tags$link(rel = "stylesheet", href = "css/study.css")
 )
+
+study_columns <- function(...) tags$div(class = "study-columns", ...)
+study_sidebar <- function(...) tags$aside(class = "study-sidebar", ...)
+study_main <- function(...) tags$section(class = "study-main", ...)
 
 gesis_footer <- includeHTML("www/gesis-footer.html")
 
@@ -69,102 +42,17 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                       })();
                     "))),
                     
-                    # website zoom
-                    tags$head(tags$style(HTML("
-                    /* Shinywaiter immer bildschirmfüllend, in allen Browsern */
-                    .waiter-overlay, #waiter-overlay, .waiter {
-                      position: fixed !important;
-                      top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
-                      width: 100vw !important;
-                      height: 100vh !important;
-                      max-width: 100vw !important;
-                      max-height: 100vh !important;
-                      transform: none !important;
-                      -webkit-transform: none !important;
-                      -ms-transform: none !important;
-                      -moz-transform: none !important;
-                      z-index: 2147483647 !important;
-                    }
-                  
-                    /* Moderne Browser: exakte Viewport-Höhe */
-                    @supports (height: 100dvh) {
-                      .waiter-overlay, #waiter-overlay, .waiter { height: 100dvh !important; }
-                    }
-                  "))),
-                                        
-                    ##################################### UI SETUP ####
-                    
-                    # Shiny helpers
                     useShinyjs(),
-                    setBackgroundColor("#ffffff"),
                     useWaiter(),
-                    
-                    tags$head(
-                      gesis_page_styles,
-                      tags$style(HTML("
-                    /* ---------- FILE INPUT (Bootstrap 3) ---------- */
-                    .bs3-fileinput .input-group { display: table !important; width: 100% !important; border-collapse: separate; }
-                    .bs3-fileinput .input-group .form-control { display: table-cell !important; width: 100% !important; float: none; }
-                    .bs3-fileinput .input-group-btn,
-                    .bs3-fileinput .input-group-prepend,
-                    .bs3-fileinput .input-group-append,
-                    .bs3-fileinput label.input-group-btn { display: table-cell !important; width: 1%; white-space: nowrap; vertical-align: middle; }
-              
-                    .btn-file { position: relative; overflow: hidden; }
-                    .btn-file > input[type=file]{
-                      position:absolute !important; top:0; right:0; min-width:100%; min-height:100%;
-                      font-size:100px; text-align:right; opacity:0; cursor:inherit; display:block;
-                    }
-              
-                    /* Make the 'Datei auswählen' clearly a button */
-                    .bs3-fileinput .btn-file{
-                      display:inline-block; background-color:#1E8CC8 !important; color:#fff !important;
-                      border:none !important; padding:6px 16px !important; font-weight:600 !important;
-                      border-radius:0 6px 6px 0 !important;
-                    }
-                    .bs3-fileinput .btn-file:hover{ background-color:#166b97 !important; }
-                    .bs3-fileinput .input-group .form-control{
-                      background:#fff; border:1px solid #cbd5e1; box-shadow:none; height:36px; line-height:1.4;
-                      border-radius:6px 0 0 6px !important;
-                    }
-                    .bs3-fileinput input[type=file]{ all: unset; }
-                    .bs3-fileinput input[type=file]::file-selector-button{ display:none !important; }
-              
-                    /* ShinyAlerts: prevent stray text input */
-                    .swal2-popup .swal2-input{display:none!important;}
-              
-                    .tab-content { padding-bottom: 3rem; }
-                    .dataTables_length select { display: inline-block; }
+                    tags$head(gesis_page_styles),
+                    tags$div(class = "study-shell",
 
-                    /* ---------- MICROSITE NAV (full width, dark, GESIS colors) ---------- */
-                    .gs-micro-nav.has-bg-color{
-                      background-color: var(--gs-darkblue-100,#072f57) !important;
-                      color:#fff; margin:0; padding:.5rem 1rem; border-radius:0 0 12px 12px;
-                    }
-                    .gs-micro-nav a{
-                      color:#fff; display:inline-block; padding:.4rem .8rem; border-radius:999px; text-decoration:none;
-                      border:1px solid transparent;
-                    }
-                    .gs-micro-nav a:hover, .gs-micro-nav a:focus{
-                      background:rgba(22,107,151,.15); color:#fff;
-                    }
-                    .gs-micro-nav a.is-active,
-                    .gs-micro-nav a[aria-current='page'],
-                    .gs-micro-nav a.active{
-                      background: var(--gs-darkblue-80,#166b97); color:#fff; border-color: var(--gs-darkblue-80,#166b97);
-                    }
-                    
-                          /* Hide Bootstrap navbar strip; we use microsite nav for tabs */
-                          .navbar, .navbar .navbar-header, .navbar .navbar-nav{display:none!important; height:0; min-height:0; margin:0; padding:0; border:0;}
-                        "))
-                    ),
-                    
                     # GESIS micro header and banner
                     tags$div(id = "gesis-micro-header", includeHTML("www/gesis-micro-header.html")),
                     includeHTML("www/gesis-microsite-banner.html"),
                     
                     # GESIS microsite navigation controlling Shiny tabs (full width, dark)
-                    tags$nav(class = "gs-micro-nav container-fluid has-bg-color gs-darkblue--65",
+                    tags$nav(class = "gs-micro-nav", `aria-label` = "Studiennavigation",
                              tags$ul(class = "list-inline",
                                      tags$li(tags$a(href = "#", `data-tab` = display_text[3],  display_text[3]  )), # Überblick
                                      tags$li(tags$a(href = "#", `data-tab` = display_text[15], display_text[15] )), # Daten hochladen
@@ -179,8 +67,8 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                     tags$script(HTML("
                     $(document).on('click','.gs-micro-nav a',function(e){
                       e.preventDefault();
-                      $('.gs-micro-nav a').removeClass('is-active');
-                      $(this).addClass('is-active');
+                      $('.gs-micro-nav a').removeClass('is-active').removeAttr('aria-current');
+                      $(this).addClass('is-active').attr('aria-current', 'page');
                       Shiny.setInputValue('go_tab', $(this).data('tab'), {priority:'event'});
                     });
                   ")),
@@ -194,24 +82,13 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                           if (show.indexOf(tab) !== -1) { $a.closest('li').show(); }
                           else { $a.closest('li').hide(); }
                           $a.toggleClass('is-active', !!active && tab === active);
+                          if (tab === active) $a.attr('aria-current', 'page');
+                          else $a.removeAttr('aria-current');
                         });
                       });
                     ")),
                     
-                    # fix sweet alerts for GESIS CSS
-                    tags$head(tags$script(HTML("
-                  new MutationObserver(function(){
-                    var p=document.querySelector('.swal2-popup');
-                    if(!p) return;
-                    p.querySelectorAll('.swal2-input,.swal2-textarea,.swal2-select,.swal2-radio,.swal2-checkbox')
-                     .forEach(function(e){ e.style.display='none'; e.style.height='0'; e.style.padding='0'; e.style.border='0'; });
-                  }).observe(document.body,{childList:true,subtree:true});
-                "))),
-                    
-                    
-                    
-                    
-                    ##################################### MAIN UI ####
+                                        ##################################### MAIN UI ####
                     
                     # Logo and App name in navbar page
                     navbarPage(title = tags$img(height = 35,
@@ -221,81 +98,28 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                windowTitle = "ChatDashboard",
                                
                                ##################################### Overview Page ####
-                               tabPanel(display_text[3],
-                                        
-                                        # whole page
-                                        fluidRow(
-                                          
-                                          # Heading 1
-                                          column(tags$p(style = "text-align: justify;",
-                                                        HTML(display_text[4])),
-                                                 HTML("<br>"),
-                                                 HTML(display_text[5]),
-                                                 HTML("<br><br>"),
-                                                 HTML(display_text[6]),
-                                                 HTML("<br><br>"),
-                                                 HTML(display_text[7]),
-                                                 HTML("<br>"),
-                                              
-                                          
-                                          # Heading 2
-                                          #column(tags$p(style = "text-align: justify;",
-                                          #              HTML(display_text[8]),
-                                          #              HTML(display_text[9]),
-                                          #              HTML("<br><br>")
-                                          #),
-                                          #width = 6, offset = 3),
-                                          
-                                          # Heading 3
-                                          #column(tags$p(style = "text-align: justify;",
-                                          #              HTML(display_text[10]),
-                                          #              HTML(display_text[11]),
-                                          #              HTML("<br><br>")
-                                          #),
-                                          #width = 6, offset = 3),
-                                          
-                                          # Heading 4
-                                          #column(tags$p(style = "text-align: justify;",
-                                          #              HTML(display_text[12]),
-                                          #              HTML(display_text[13]),
-                                          #              HTML("<br><br>")
-                                          #),
-                                          #width = 6, offset = 3),
-                                          
-                                          tags$head(
-                                            tags$style(HTML("
-                                                      .callout{padding:1rem;border-left:4px solid #0d6efd;background:#f8f9fa;border-radius:.25rem}
-                                                      .callout h4{margin-top:0;margin-bottom:.5rem}
-                                                    "))
-                                          ),
-                                          tags$div(class = "callout",
-                                                   tags$h4("Wichtig:"),
-                                                   "Diese Website ist für den PC optimiert. Sie können mit dem Smartphone fortfahren, sollten aber vermeiden den Tab zu schließen, zu minimieren oder das Display zu sperren bevor die Datenspende abgeschlossen ist um Verbindungsprobleme zu vermeiden."
-                                          ),
-                                          
-                                          HTML("<br><br>"), width = 6, offset = 3),
-                                          
-                                          # Consent button
-                                          column(12, align = "center",
-                                                 actionButton("IntroCheck",
-                                                              label = display_text[14],
-                                                              class = "btn-warning",
-                                                              style = "color: #FFFFFF; background-color: #E2007A; border-color: #E2007A"),
-                                                 HTML("<br><br><br><br><br><br>")
-                                          )
-                                          
-                                          # End of fluidRow
-                                        )
-                                        
-                                        # End of tabPanel
+                               tabPanel(
+                                 display_text[3],
+                                 tags$section(
+                                   class = "study-intro",
+                                   tags$header(class = "study-intro-title", HTML(display_text[4])),
+                                   tags$div(class = "study-prose",
+                                            HTML(display_text[5]),
+                                            HTML(display_text[6]),
+                                            HTML(display_text[7])),
+                                   tags$div(class = "callout",
+                                            tags$strong("Wichtig"),
+                                            tags$p("Lassen Sie diese Seite während der Datenspende geöffnet, damit Ihre Verbindung erhalten bleibt.")),
+                                   actionButton("IntroCheck", display_text[14], class = "study-primary")
+                                 )
                                ),
-                               
+
                                ##################################### DATA UPLOAD PAGE ####
                                tabPanel(display_text[15],
                                         
                                         # Sidebar
-                                        sidebarLayout(
-                                          sidebarPanel(h2(display_text[16],
+                                        study_columns(
+                                          study_sidebar(h2(display_text[16],
                                                           align = "center"),
                                                        
                                                        # Text for sidebar panel
@@ -306,35 +130,24 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                        div(class = "bs3-fileinput",
                                                            fileInput("file", label = "",
                                                                      accept = c(".txt", ".zip"),
-                                                                     buttonLabel = display_text[20])
+                                                                     buttonLabel = display_text[20],
+                                                                     placeholder = if (landing_page_language == "de") "Keine Datei ausgewählt" else "No file selected")
                                                        ),
                                                        
                                                        # Upload button
                                                        actionButton(inputId = "submit",
                                                                     label = display_text[21],
-                                                                    class = "btn-warning",
-                                                                    style = "color: #FFFFFF; background-color: #E2007A; border-color: #E2007A")
+                                                                    class = "study-primary")
                                           ),
                                           
                                          
                                           #### MAIN PANEL 
-                                          mainPanel(
-                                            column(
-                                              width = 10, offset = 1,
+                                          study_main(
+                                            tags$div(class = "study-export-guide",
                                               
                                               # Heading + body text
                                               tags$h2("WhatsApp Chatverläufe exportieren"),
                                               tags$p("Wenn Sie den Chatverlauf bereits auf ihr Telefon oder Ihren PC exportiert haben können Sie diesen direkt links (PC) oder oben (Smartphone) hochladen. Falls nicht, klicken Sie hier auf den entsprechenden Reiter unten um die richtige Anleitung zum Export von WhatsApp Chatverläufen für Ihr Telefon auszuwählen."),
-                                              
-                                              # minimal spacing
-                                              tags$head(
-                                                tags$style(HTML("
-                                                  details { margin-bottom: 16px; }
-                                                  summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
-                                                  details > *:not(summary) { margin-top: 8px; }
-                                                  img { display:block; }
-                                                "))
-                                              ),
                                               
                                               # ANDROID
                                               tags$details(
@@ -391,7 +204,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                tabPanel(display_text[87],
                                         
                                         # Sidebar
-                                        sidebarPanel(
+                                        study_sidebar(
                                           
                                           # Info text
                                           h2(display_text[87], align = "center"),
@@ -411,17 +224,17 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           # action button
                                           actionButton("person_submit",
                                                        display_text[89],
-                                                       style = "color: #FFFFFF; background-color: #E2007A; border-color: #E2007A"),
+                                                       class = "study-primary"),
                                         ),
                                         
                                         # Main panel
-                                        mainPanel(
+                                        study_main(
                                           
                                           # headline
                                           h2(display_text[87], align = "center"),
                                           
                                           # information
-                                          HTML(display_text[58]),
+                                          tags$div(class = "study-privacy", HTML(display_text[58])),
                                           
                                           # table display here
                                           DTOutput("selection_frame"),
@@ -442,7 +255,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                tabPanel(display_text[28],
                                         
                                         # Sidebar Panel
-                                        sidebarPanel(
+                                        study_sidebar(
                                           
                                           # Info text
                                           #h2(display_text[29], align = "center"),
@@ -495,32 +308,24 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           helpText(display_text[41]),
                                           actionButton(inputId = "donation",
                                                        label = display_text[42],
-                                                       class = "btn-warning",
-                                                       style = "color: #FFFFFF; background-color: #E2007A; border-color: #E2007A")
+                                                       class = "study-primary")
                                           
                                           # End sidebar panel
                                         ),
                                         
                                         # Main panel
-                                        mainPanel(
+                                        study_main(
                                           
                                           # Headline
                                           h1(display_text[43],align = "center"),
-                                          HTML("<br>"),
                                           
                                           # Dataframe
                                           DTOutput("frame"),
                                           
                                           # Download buttons
-                                          fluidRow(column(1,
-                                                          align = "topright",
-                                                          downloadButton("downloadSelection",
-                                                                         display_text[44])),
-                                                   column(1,
-                                                          align = "topleft",
-                                                          downloadButton("downloadData",
-                                                                         display_text[45]),
-                                                          offset = 9),),
+                                          tags$div(class = "study-downloads",
+                                                   downloadButton("downloadSelection", display_text[44]),
+                                                   downloadButton("downloadData", display_text[45])),
                                           
                                           # End main panel
                                         )
@@ -531,13 +336,13 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                ##################################### OVERALL RESULTS PAGE ####
                                tabPanel(display_text[46],
                                         
-                                        tabsetPanel(type = "tabs",
+                                        tabsetPanel(id = "study-results-tabs", type = "tabs",
                                                     
                                                     ##################################### RESULTS: MESSAGES SUBPAGE ####
                                                     tabPanel(display_text[47],
                                                              
                                                              # sidebar panel
-                                                             sidebarPanel(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(display_text[48], align = "center"),
                                                                           tags$p(display_text[49]),
                                                                           
                                                                           # Sender selection
@@ -565,12 +370,11 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                              ),
                                                              
                                                              # Main Panel
-                                                             mainPanel(
+                                                             study_main(
                                                                
                                                                # Plot 1
                                                                h1(display_text[57],align = "center"),
-                                                               HTML(display_text[58]),
-                                                               HTML("<br><br>"),
+                                                               tags$div(class = "study-privacy", HTML(display_text[58])),
                                                                addSpinner(plotOutput("message1",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -579,7 +383,6 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                
                                                                # Plot 2
                                                                h1(display_text[59],align = "center"),
-                                                               HTML("<br><br>"),
                                                                addSpinner(plotOutput("tokensbwah1",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -602,7 +405,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[60],
                                                              
                                                              # sidebar panel
-                                                             sidebarPanel(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(display_text[48], align = "center"),
                                                                           tags$p(display_text[61]),
                                                                           
                                                                           # sender selection
@@ -639,11 +442,11 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                              ),
                                                              
                                                              # Main Panel
-                                                             mainPanel(
+                                                             study_main(
                                                                
                                                                # Plot 1
                                                                h3(display_text[65], align = "center"),
-                                                               HTML(display_text[58]),
+                                                               tags$div(class = "study-privacy", HTML(display_text[58])),
                                                                addSpinner(plotOutput("links4",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -672,7 +475,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[66],
                                                              
                                                              # sidebar panel
-                                                             sidebarPanel(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(display_text[48], align = "center"),
                                                                           tags$p(display_text[67]),
                                                                           
                                                                           # sender selection
@@ -707,11 +510,11 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                              ),
                                                              
                                                              # Main Panel
-                                                             mainPanel(
+                                                             study_main(
                                                                
                                                                # Plot 1
                                                                h3(display_text[69], align = "center"),
-                                                               HTML(display_text[58]),
+                                                               tags$div(class = "study-privacy", HTML(display_text[58])),
                                                                addSpinner(plotOutput("smilies4",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -742,7 +545,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[70],
                                                              
                                                              # sidebar panel
-                                                             sidebarPanel(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(display_text[48], align = "center"),
                                                                           tags$p(display_text[71]),
                                                                           
                                                                           # sender selection
@@ -780,12 +583,12 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                              ),
                                                              
                                                              # Main Panel
-                                                             mainPanel(
+                                                             study_main(
                                                                
                                                                # Plot 1
                                                                h3(display_text[73],
                                                                   align = "center"),
-                                                               HTML(display_text[58]),
+                                                               tags$div(class = "study-privacy", HTML(display_text[58])),
                                                                addSpinner(plotOutput("emoji4",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -817,7 +620,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[74],
                                                              
                                                              # sidebar panel
-                                                             sidebarPanel(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(display_text[48], align = "center"),
                                                                           
                                                                           tags$p(display_text[75]),
                                                                           
@@ -846,11 +649,11 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                              ),
                                                              
                                                              # Main Panel
-                                                             mainPanel(
+                                                             study_main(
                                                                
                                                                # Plot 1
                                                                h3(display_text[74], align = "center"),
-                                                               HTML(display_text[58]),
+                                                               tags$div(class = "study-privacy", HTML(display_text[58])),
                                                                addSpinner(plotOutput("replytime1",
                                                                                      height = "600px"),
                                                                           spin = "circle",
@@ -880,16 +683,15 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                
                                ##################################### RESULTS: IMPRESSUM PAGE ####
                                tabPanel(display_text[76],
-                                        column(tags$p(
-                                          HTML(display_text[77])),
-                                          width = 6, offset = 5))
+                                        tags$section(class = "study-contact",
+                                                     tags$h2(display_text[76]),
+                                                     HTML(display_text[77])))
                                
                                # End navbarpage
                     ),
                     
                     gesis_footer
-                    
-                    # End ui
+                    )
 )
 
 ###################################################################################### SECURING APP WITH SHINYMANAGER #####
@@ -898,43 +700,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
 secure_ui <- shinymanager::secure_app(
   app_ui,
   language = landing_page_language,
-  head_auth = tagList(
-    gesis_page_styles,
-    tags$style(HTML("
-      #auth-auth-mod.gesis-login {
-        display: flex;
-        flex-direction: column;
-      }
-      .gesis-login > .gesis-login-header,
-      .gesis-login > footer.page-footer {
-        flex: 0 0 auto;
-      }
-      /* Replace shinymanager's fixed top spacer with responsive row padding. */
-      .gesis-login > br,
-      .gesis-login > div[style='height: 70px;'] {
-        display: none;
-      }
-      .gesis-login > .row {
-        box-sizing: border-box;
-        display: flex;
-        flex: 1 0 auto;
-        align-items: center;
-        justify-content: center;
-        margin: 0;
-        padding: clamp(1rem, 4vw, 3rem) 1rem;
-      }
-      .gesis-login > .row > .col-sm-4 {
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 560px;
-        margin: 0;
-        padding: 0;
-      }
-      .gesis-login > .row > .col-sm-4 > .panel {
-        margin-bottom: 0;
-      }
-    "))
-  )
+  head_auth = gesis_page_styles
 )
 
 gesis_login_header <- tags$header(

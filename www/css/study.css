@@ -1,0 +1,296 @@
+/* Layout and component overrides for the ChatDashboard study. */
+:root {
+  --study-navy: var(--gs--color--gs-darkblue, #003c78);
+  --study-ink: #162d43;
+  --study-muted: #41566d;
+  --study-surface: #f4f7fa;
+  --study-border: #c5d1de;
+  --study-accent: #b90063;
+  --study-page: 1440px;
+  --study-gutter: clamp(16px, 4vw, 56px);
+}
+
+body > .container-fluid:has(> .study-shell) { padding: 0; }
+.study-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--study-surface);
+}
+.study-shell > .container-fluid { flex: 1 0 auto; width: 100%; }
+.study-shell > .navbar { display: none !important; }
+.study-shell > .container-fluid > .tab-content,
+.study-shell > .tab-content {
+  max-width: var(--study-page);
+  margin-inline: auto;
+  padding: clamp(22px, 4vw, 52px) var(--study-gutter);
+}
+.study-shell,
+.gesis-login {
+  color: var(--study-ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.study-shell :is(h1, h2, h3),
+.gesis-login .panel h3 { color: var(--study-navy); }
+.study-shell :is(h1, h2, h3, p, .help-block, .btn) { overflow-wrap: anywhere; }
+.study-shell h1 { font-size: clamp(28px, 4vw, 44px); }
+.study-shell h2 { font-size: clamp(24px, 3vw, 32px); }
+.study-shell h3 { font-size: clamp(20px, 2.5vw, 25px); }
+.study-shell :is(h1, h2, h3) { text-align: start; line-height: 1.2; }
+.study-shell p { margin: 0 0 1em; }
+.study-shell .help-block { color: var(--study-muted); margin-block: 0 14px; }
+
+.page-banner.microsite {
+  background: linear-gradient(90deg, #15234b80, #15234b38), url('../banner-microsite-07.svg') center/cover no-repeat;
+  margin: 0;
+  min-height: 0;
+}
+.page-banner.microsite .page-banner--inner {
+  background: transparent !important;
+  width: 100%;
+  max-width: var(--study-page);
+  margin-inline: auto;
+  padding: clamp(18px, 4vw, 38px) var(--study-gutter);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow-wrap: anywhere;
+}
+.page-banner.microsite .study-banner-title {
+  margin: 0;
+  color: white;
+  font-size: clamp(23px, 4vw, 38px);
+  line-height: 1.15;
+}
+.page-banner.microsite .microsite-logo {
+  flex: 0 0 auto;
+  display: flex;
+  width: clamp(52px, 9vw, 96px);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.gs-micro-nav { background: var(--study-navy); }
+.gs-micro-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  align-items: center;
+  gap: 4px 10px;
+  max-width: var(--study-page);
+  margin: 0 auto;
+  padding: 5px var(--study-gutter);
+}
+.gs-micro-nav li { margin: 0; padding: 0; }
+.gs-micro-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 5px 12px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+.gs-micro-nav a:hover,
+.gs-micro-nav a.is-active { color: #fff; background: #ffffff20; }
+.gs-micro-nav a.is-active { border-bottom-color: #ff80bd; }
+.gs-micro-nav a:focus-visible,
+.study-shell .btn:focus-visible,
+.gesis-login .btn:focus-visible { outline: 3px solid #1785bc; outline-offset: 3px; }
+.gs-micro-nav a:focus-visible { outline-color: #fff; outline-offset: -3px; }
+
+.study-columns, .tab-pane.active:has(> .study-sidebar) {
+  display: grid;
+  grid-template-columns: minmax(235px, 320px) minmax(0, 1fr);
+  gap: clamp(16px, 3vw, 32px);
+  align-items: start;
+}
+.study-sidebar, .study-main, .study-intro, .study-contact {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--study-border);
+  border-radius: 12px;
+  padding: clamp(16px, 2.8vw, 32px);
+}
+.study-sidebar { background: #fafcfe; }
+.study-sidebar > :first-child,
+.study-main > :first-child,
+.study-intro-title > :first-child,
+.study-contact > :first-child { margin-top: 0; }
+.study-sidebar > h3:not(:first-child) { margin-top: 24px; }
+.study-intro, .study-contact { max-width: 800px; margin-inline: auto; }
+.study-intro-title h1 { margin-bottom: 22px; }
+.study-prose { max-width: 70ch; }
+.study-intro .callout, .study-privacy {
+  background: #eaf4fb;
+  border-inline-start: 4px solid var(--study-navy);
+  padding: 12px 16px;
+  margin-block: 18px;
+  border-radius: 0 8px 8px 0;
+}
+.study-intro .callout p { margin: 4px 0 0; }
+.study-privacy center { text-align: start; }
+.study-privacy strong { color: var(--study-ink) !important; }
+.study-privacy > br { display: none; }
+
+.study-shell .btn,
+.gesis-login .btn {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 15px;
+  line-height: 1.35;
+  white-space: normal;
+  border-radius: 8px;
+}
+.study-shell .btn.study-primary,
+.gesis-login #auth-go_auth {
+  background: var(--study-accent);
+  border-color: var(--study-accent);
+  color: #fff;
+  font-weight: 700;
+}
+.study-shell .btn.study-primary:hover,
+.gesis-login #auth-go_auth:hover { background: #93004f; border-color: #93004f; }
+.study-shell .form-control,
+.gesis-login .form-control { min-height: 44px; font-size: 16px; }
+.study-shell .shiny-input-container,
+.gesis-login .shiny-input-container { max-width: 100%; }
+.study-sidebar :is(.bootstrap-select, .selectize-control) { max-width: 100%; }
+.study-sidebar .btn-group { display: flex; flex-wrap: wrap; }
+.study-sidebar .btn-group .btn { max-width: 100%; }
+.study-sidebar .btn:not(.dropdown-toggle) { margin-block: 2px; }
+.study-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.bs3-fileinput .input-group { display: flex; width: 100%; }
+.bs3-fileinput .input-group-btn { width: auto; }
+.bs3-fileinput .input-group .form-control { flex: 1 1 0; min-width: 0; width: auto; }
+.bs3-fileinput .btn-file {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background: var(--study-navy);
+  color: white;
+  border-radius: 8px 0 0 8px;
+  white-space: normal;
+}
+.bs3-fileinput .btn-file:focus-within { outline: 3px solid #1785bc; outline-offset: -3px; }
+.bs3-fileinput .btn-file input[type=file] {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.study-export-guide details {
+  border: 1px solid var(--study-border);
+  border-radius: 8px;
+  padding: 0 14px;
+  margin-block: 10px;
+}
+.study-export-guide details[open] { padding-bottom: 12px; }
+.study-export-guide summary {
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--study-navy);
+}
+.study-export-guide img { display: block; max-width: 100%; height: auto; margin-bottom: 12px; }
+
+.study-shell .dataTables_wrapper { min-width: 0; max-width: 100%; }
+.study-shell .dataTables_scrollBody { overscroll-behavior-inline: contain; }
+.study-shell .dataTables_wrapper input,
+.study-shell .dataTables_wrapper select { min-height: 40px; }
+.study-shell table.dataTable th { color: var(--study-navy); background: #eaf4fb; }
+.study-shell table.dataTable :is(td, th) {
+  padding: 9px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 32ch;
+}
+.study-shell .dataTables_wrapper .paginate_button { min-height: 40px; }
+#study-results-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+#study-results-tabs > li > a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--study-navy);
+  font-weight: 600;
+}
+#study-results-tabs > li.active > a { border-bottom: 3px solid var(--study-accent); }
+.study-main .shiny-plot-output { min-width: 0; height: clamp(300px, 48vw, 600px) !important; }
+
+#auth-auth-mod.gesis-login { display: flex; flex-direction: column; background: var(--study-surface); }
+.gesis-login > .gesis-login-header,
+.gesis-login > footer.page-footer { flex: 0 0 auto; }
+.gesis-login > br,
+.gesis-login > div[style='height: 70px;'] { display: none; }
+.gesis-login > .row {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: clamp(22px, 5vw, 62px) var(--study-gutter);
+}
+.gesis-login > .row > .col-sm-4 { width: 100%; max-width: 460px; margin: 0; padding: 0; }
+.gesis-login > .row > .col-sm-4 > .panel {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--study-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px #18314d12;
+}
+.gesis-login .panel-body { padding: clamp(18px, 4vw, 34px); }
+
+footer.page-footer {
+  position: static;
+  clear: both;
+  padding-block: clamp(24px, 4vw, 56px);
+  overflow-wrap: anywhere;
+}
+footer.page-footer .page-footer--inner > * { min-width: 0; }
+footer.page-footer .social-media-icons,
+footer.page-footer nav.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 12px;
+}
+footer.page-footer .leibniz-logo-wrapper img { height: auto; }
+
+.sweet-alert,
+.swal2-popup { max-width: calc(100vw - 28px); overflow-wrap: anywhere; }
+.sweet-alert button,
+.swal2-popup button { min-height: 44px; }
+.swal2-popup :is(.swal2-input, .swal2-textarea, .swal2-select, .swal2-radio, .swal2-checkbox) { display: none !important; }
+.waiter-overlay, #waiter-overlay, .waiter {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+}
+
+@media (max-width: 820px) {
+  .study-columns, .tab-pane.active:has(> .study-sidebar) { grid-template-columns: minmax(0, 1fr); }
+  .study-main, .study-sidebar { padding: 16px; }
+  .study-sidebar .bootstrap-select .dropdown-menu { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .study-shell .dataTables_wrapper :is(.dataTables_length, .dataTables_filter) {
+    float: none;
+    margin-bottom: 10px;
+    text-align: start;
+  }
+  .study-shell .dataTables_wrapper .dataTables_filter input { max-width: 100%; }
+  .study-downloads .btn { flex: 1 1 100%; }
+}

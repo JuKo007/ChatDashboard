@@ -253,45 +253,23 @@ server <- function(input, output, session) {
     # only displaying data if at least two columns are selected, do nothing if less are selected
     if (length(input$show_vars) >= 2) {
       
-      # coloring non-donateable columns grey after checking if they're present
-      color_identifier <- colnames(rv$copy[as.numeric(rownames(rv$copy)), intersect(as.character(input$show_vars), colnames(rv$copy)), drop = FALSE])[colnames(rv$copy[as.numeric(rownames(rv$copy)), intersect(as.character(input$show_vars), colnames(rv$copy)), drop = FALSE])
- %in% Colnames_exclude_pii]
-      
-      # inner if
-      if (length(color_identifier) > 0) {datatable(rv$copy[,c(input$show_vars)],
-                                                   options = list(scrollY = "750px",
-                                                                  scrollX = TRUE,
-                                                                  ordering = FALSE,
-                                                                  language = list(url = datatable_language)
-                                                                  
-                                                                  ,columnDefs = list(list(
-                                                                    targets = "_all",
-                                                                    render = JS(
-                                                                      "function(data, type, row, meta) {",
-                                                                      "return type === 'display' && data != null && data.length > 35 ?",
-                                                                      "'<span title=\"' + data + '\">' + data.substr(0, 50) + '...</span>' : data;",
-                                                                      "}")))
-                                                                  
-                                                                  # end inner if                
-                                                   )) %>% formatStyle(color_identifier,backgroundColor = "lightgrey")}
-      
-      # inner else
-      else{datatable(rv$copy[,c(input$show_vars)], options = list(scrollY = "750px",
-                                                                  scrollX = TRUE,
-                                                                  ordering = F,
-                                                                  language = list(url = datatable_language)
-                                                                  
-                                                                  
-                                                                  ,columnDefs = list(list(
-                                                                    targets = "_all",
-                                                                    render = JS(
-                                                                      "function(data, type, row, meta) {",
-                                                                      "return type === 'display' && data != null && data.length > 35 ?",
-                                                                      "'<span title=\"' + data + '\">' + data.substr(0, 50) + '...</span>' : data;",
-                                                                      "}")))
-                                                                  # End  inner else                                                        
-      ))}
-      
+      preview <- rv$copy[, input$show_vars, drop = FALSE]
+      excluded <- intersect(names(preview), Colnames_exclude_pii)
+      table <- datatable(
+        preview,
+        escape = TRUE,
+        options = list(
+          scrollX = TRUE,
+          autoWidth = FALSE,
+          ordering = FALSE,
+          language = list(url = datatable_language)
+        )
+      )
+      if (length(excluded) > 0L) {
+        table <- formatStyle(table, excluded, backgroundColor = "#edf0f3")
+      }
+      table
+
       # outer else
     } else{
       
