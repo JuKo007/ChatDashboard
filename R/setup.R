@@ -121,8 +121,11 @@ log_event <- function(event, session) {
     stringsAsFactors = FALSE
   )
   
-  write.table(row, file = log_path, sep = ",", row.names = FALSE,
-              col.names = !file.exists(log_path), append = TRUE)
+  new_log <- !file.exists(log_path)
+  log_file <- file(log_path, open = "at")
+  on.exit(close(log_file), add = TRUE)
+  write.table(row, file = log_file, sep = ",", row.names = FALSE,
+              col.names = new_log)
 }
 
 

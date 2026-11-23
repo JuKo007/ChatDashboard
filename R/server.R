@@ -250,7 +250,7 @@ server <- function(input, output, session) {
                     if (landing_page_language == "de") "Im Chat wurden keine Personen gefunden." else "No participants were found in the chat."))
     }
 
-    labels <- Map(function(name, alias) {
+    labels <- mapply(function(name, alias) {
       tags$span(
         class = "study-person-option",
         tags$span(
@@ -260,13 +260,13 @@ server <- function(input, output, session) {
         ),
         tags$span(class = "study-person-name", name)
       )
-    }, people$name, people$alias)
+    }, people$name, people$alias, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 
     radioButtons(
       "person_select",
       label = if (landing_page_language == "de") "Person im Chat" else "Participant in the chat",
       selected = character(0),
-      choiceNames = labels, choiceValues = people$alias, width = "100%"
+      choiceNames = labels, choiceValues = unname(people$alias), width = "100%"
     )
   })
 
