@@ -1071,35 +1071,66 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
 
 ###################################################################################### SECURING APP WITH SHINYMANAGER #####
 
-# Wrapping UI with secure_app for password protection
-ui <- shinymanager::secure_app(
+# Let shinymanager build the login form, then add branding around its card.
+secure_ui <- shinymanager::secure_app(
   app_ui,
   language = landing_page_language,
-  
   head_auth = tagList(
     gesis_page_styles,
     tags$style(HTML("
-      .panel-auth #gesis-micro-header,
-      .panel-auth #gesis-micro-header > * {
-        position: static;
+      #auth-auth-mod.gesis-login {
+        display: flex;
+        flex-direction: column;
       }
-      .panel-auth > .panel,
-      .panel-auth .panel.panel-default,
-      .panel-auth .auth-panel {
+      .gesis-login > .gesis-login-header,
+      .gesis-login > footer.page-footer {
+        flex: 0 0 auto;
+      }
+      /* Replace shinymanager's fixed top spacer with responsive row padding. */
+      .gesis-login > br,
+      .gesis-login > div[style='height: 70px;'] {
+        display: none;
+      }
+      .gesis-login > .row {
         box-sizing: border-box;
-        width: min(560px, calc(100% - 2rem));
-        margin: 1.5rem auto;
+        display: flex;
+        flex: 1 0 auto;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: clamp(1rem, 4vw, 3rem) 1rem;
+      }
+      .gesis-login > .row > .col-sm-4 {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 560px;
+        margin: 0;
+        padding: 0;
+      }
+      .gesis-login > .row > .col-sm-4 > .panel {
+        margin-bottom: 0;
       }
     "))
-  ),
-
-  tags_top = tagList(
-    tags$div(id = "gesis-micro-header", includeHTML("www/gesis-micro-header.html")),
-    includeHTML("www/gesis-microsite-banner.html")
-  ),
-
-  tags_bottom = gesis_footer
+  )
 )
+
+gesis_login_header <- tags$header(
+  class = "gesis-login-header",
+  tags$div(id = "gesis-micro-header", includeHTML("www/gesis-micro-header.html")),
+  includeHTML("www/gesis-microsite-banner.html")
+)
+
+ui <- function(request) {
+  page <- secure_ui(request)
+  login <- htmltools::tagQuery(page)$find("#auth-auth-mod.panel-auth")
+  if (login$length() == 0) return(page)
+
+  login$
+    addClass("gesis-login")$
+    prepend(gesis_login_header)$
+    append(gesis_footer)$
+    allTags()
+}
 
 
 
