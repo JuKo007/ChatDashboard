@@ -8,6 +8,7 @@ gesis_page_styles <- tagList(
 study_columns <- function(...) tags$div(class = "study-columns", ...)
 study_sidebar <- function(...) tags$aside(class = "study-sidebar", ...)
 study_main <- function(...) tags$section(class = "study-main", ...)
+study_filter_title <- if (landing_page_language == "de") "Diagrammfilter" else "Chart filters"
 
 gesis_footer <- includeHTML("www/gesis-footer.html")
 
@@ -241,6 +242,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                       multiple = TRUE,
                                                       options  = pickerOptions(
                                                         selectedTextFormat = "count",
+                                                        size = 7,
                                                         countSelectedText  = "{0} Spalten ausgewählt"#,
                                                         #mobile = TRUE
                                                       ),
@@ -313,7 +315,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[47],
                                                              
                                                              # sidebar panel
-                                                             study_sidebar(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(study_filter_title),
                                                                           tags$p(display_text[49]),
                                                                           
                                                                           # Sender selection
@@ -376,7 +378,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[60],
                                                              
                                                              # sidebar panel
-                                                             study_sidebar(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(study_filter_title),
                                                                           tags$p(display_text[61]),
                                                                           
                                                                           # sender selection
@@ -446,7 +448,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[66],
                                                              
                                                              # sidebar panel
-                                                             study_sidebar(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(study_filter_title),
                                                                           tags$p(display_text[67]),
                                                                           
                                                                           # sender selection
@@ -516,7 +518,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[70],
                                                              
                                                              # sidebar panel
-                                                             study_sidebar(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(study_filter_title),
                                                                           tags$p(display_text[71]),
                                                                           
                                                                           # sender selection
@@ -591,7 +593,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                     tabPanel(display_text[74],
                                                              
                                                              # sidebar panel
-                                                             study_sidebar(h3(display_text[48], align = "center"),
+                                                             study_sidebar(h3(study_filter_title),
                                                                           
                                                                           tags$p(display_text[75]),
                                                                           

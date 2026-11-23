@@ -280,18 +280,25 @@ server <- function(input, output, session) {
     if (length(input$show_vars) >= 2) {
       
       preview <- rv$copy[, input$show_vars, drop = FALSE]
-      excluded <- intersect(names(preview), Colnames_exclude_pii)
+      preview_only <- which(names(preview) %in% Colnames_exclude_pii)
       time_column <- match("Zeit", names(preview))
-      table <- datatable(
+      column_definitions <- list()
+      # DT includes a row-number column at index zero.
+      if (length(preview_only)) {
+        column_definitions <- list(list(targets = preview_only, className = "study-preview-only"))
+      }
+      if (!is.na(time_column)) {
+        column_definitions <- c(column_definitions,
+                                list(list(targets = time_column, className = "study-timestamp")))
+      }
+      datatable(
         preview,
         colnames = gsub("_", " ", names(preview), fixed = TRUE),
         escape = TRUE,
         options = list(
           scrollX = TRUE,
           autoWidth = FALSE,
-          columnDefs = if (!is.na(time_column)) {
-            list(list(targets = time_column, className = "study-timestamp"))
-          },
+          columnDefs = column_definitions,
           rowCallback = JS(
             "function(row) {",
             "  row.querySelectorAll('td').forEach(function(cell) {",
@@ -313,10 +320,6 @@ server <- function(input, output, session) {
           language = list(url = datatable_language)
         )
       )
-      if (length(excluded) > 0L) {
-        table <- formatStyle(table, match(excluded, names(preview)), backgroundColor = "#edf0f3")
-      }
-      table
 
       # outer else
     } else{
@@ -339,6 +342,7 @@ server <- function(input, output, session) {
                         options  = pickerOptions(
                           mobile = is_mobile(),
                           selectedTextFormat = "count",
+                          size = 7,
                           countSelectedText  = "{0} Spalten ausgewählt",
                           container = if (is_mobile()) "body" else NULL
                         ),
@@ -371,7 +375,7 @@ server <- function(input, output, session) {
   ################################### DATA SELECTION & DISPLAY ####
   
   # row exclusion
-  observeEvent(c(input$excludeRows,input$show_vars),{
+  observeEvent(input$excludeRows, {
     
     # require inputs
     req(rv$copy,input$show_vars,input$frame_rows_selected)
@@ -587,6 +591,7 @@ server <- function(input, output, session) {
                       options  = pickerOptions(
                         mobile = is_mobile(),
                         selectedTextFormat = "count",
+                        size = 7,
                         countSelectedText  = "{0} Spalten ausgewählt",
                         container = if (is_mobile()) "body" else NULL
                       ),

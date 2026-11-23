@@ -133,6 +133,7 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
 .study-sidebar > h3:not(:first-child) { margin-top: 24px; }
 .study-intro, .study-contact { max-width: 800px; margin-inline: auto; }
 .study-intro-title h1 { margin-bottom: 22px; }
+.study-intro .study-prose { max-width: none; }
 .study-prose { max-width: 70ch; }
 .study-prose,
 .study-prose p {
@@ -203,9 +204,19 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
 .study-sidebar .btn:not(.dropdown-toggle) { margin-block: 2px; }
 .study-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
-.bs3-fileinput .input-group { display: flex; width: 100%; }
-.bs3-fileinput .input-group-btn { width: auto; }
-.bs3-fileinput .input-group .form-control { flex: 1 1 0; min-width: 0; width: auto; }
+.bs3-fileinput .input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+}
+.bs3-fileinput .input-group-btn { display: block; width: 100%; }
+.bs3-fileinput .input-group .form-control {
+  width: 100%;
+  border-radius: 8px;
+  text-overflow: ellipsis;
+}
 .bs3-fileinput .btn-file {
   position: relative;
   overflow: hidden;
@@ -213,7 +224,9 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
   align-items: center;
   background: var(--study-navy);
   color: white;
-  border-radius: 8px 0 0 8px;
+  width: 100%;
+  justify-content: center;
+  border-radius: 8px;
   white-space: normal;
 }
 .bs3-fileinput .btn-file:focus-within { outline: 3px solid #1785bc; outline-offset: -3px; }
@@ -226,19 +239,23 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
   cursor: pointer;
 }
 .study-export-guide details {
-  border: 1px solid var(--study-border);
-  border-radius: 8px;
-  padding: 0 14px;
-  margin-block: 10px;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  border: 1px solid var(--study-border) !important;
+  border-radius: 8px !important;
 }
-.study-export-guide details[open] { padding-bottom: 12px; }
-.study-export-guide summary {
+.study-export-guide details > summary {
+  position: relative;
   min-height: 44px;
-  padding-block: 10px;
-  cursor: pointer;
+  padding: 10px 42px 10px 14px;
+  border: 0 !important;
+  border-radius: 7px !important;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--study-navy);
 }
+.study-export-guide details > summary::after { top: 50%; right: 15px; translate: 0 -50%; }
+.study-export-guide details > :not(summary) { margin-inline: 14px; }
+.study-export-guide details > img { width: calc(100% - 28px) !important; }
 .study-export-guide img { display: block; max-width: 100%; height: auto; margin-bottom: 12px; }
 
 .study-shell .dataTables_wrapper { min-width: 0; max-width: 100%; }
@@ -425,4 +442,32 @@ footer.page-footer .leibniz-logo-wrapper img { height: auto; }
 .study-person-picker input:focus-visible + span .study-person-card {
   outline: 3px solid #1785bc;
   outline-offset: 3px;
+}
+
+.study-donation-table table.dataTable th.study-preview-only,
+.study-donation-table table.dataTable tr:not(.selected) > td.study-preview-only {
+  background-color: #edf0f3;
+}
+.study-donation-table td details, .study-donation-table td details summary {
+  border: 0 !important;
+  padding: 0 !important;
+}
+.study-donation-table td details > summary {
+  position: static;
+  font: inherit;
+  color: var(--study-navy);
+  background: transparent !important;
+}
+.study-donation-table td details > summary::after {
+  content: "▾";
+  position: static;
+  margin-inline-start: 5px;
+  font: inherit;
+  color: inherit;
+}
+.study-donation-table td details[open] > summary::after { content: "▴"; }
+.study-donation-table td details > div {
+  padding: 6px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
 }
