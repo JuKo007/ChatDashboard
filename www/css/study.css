@@ -129,28 +129,6 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
   text-align: justify;
   hyphens: auto;
 }
-.study-participant {
-  max-width: 600px;
-  margin-inline: auto;
-  padding: clamp(18px, 4vw, 40px);
-  background: #fff;
-  border: 1px solid var(--study-border);
-  border-radius: 12px;
-}
-.study-participant h2 { margin-top: 0; }
-.study-participant .selectize-input {
-  min-height: 48px;
-  padding: 12px;
-  border-color: var(--study-border);
-}
-.study-participant .selectize-dropdown .option {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  overflow-wrap: anywhere;
-}
-.study-participant .study-participant-note { color: var(--study-muted); }
 .study-export-guide ol, .study-sidebar ol { padding-inline-start: 1.6em; }
 .study-export-guide ol li, .study-sidebar ol li { margin-block: .45em; }
 

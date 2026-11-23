@@ -200,28 +200,56 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                ),
                                
                                ##################################### PARTICIPANT - USER SELECTION PAGE ####
-                               tabPanel(
-                                 display_text[87],
-                                 tags$section(
-                                   class = "study-participant",
-                                   tags$h2("Wer sind Sie im Chat?"),
-                                   tags$p("Wählen Sie Ihren Namen so aus, wie er im Chat angezeigt wird."),
-                                   selectizeInput(
-                                     "person_select", "Ihr Name im Chat",
-                                     choices = NULL, width = "100%",
-                                     options = list(
-                                       placeholder = "Namen auswählen oder suchen",
-                                       openOnFocus = TRUE
-                                     )
-                                   ),
-                                   tags$p(class = "study-participant-note",
-                                          "Für die Datenspende wird nur Ihre Kennung (z. B. Person_1) verwendet."),
-                                   shinyjs::disabled(
-                                     actionButton("person_submit", display_text[89], class = "study-primary")
-                                   )
-                                 )
+                               tabPanel(display_text[87],
+                                        
+                                        # Sidebar
+                                        study_sidebar(
+                                          
+                                          # Info text
+                                          h2(display_text[87], align = "center"),
+                                          HTML(display_text[90]),
+                                          
+                                          # spacer
+                                          HTML("<br><br>"),
+                                          
+                                          # input selector
+                                          selectInput("person_select",
+                                                      label = display_text[91],
+                                                      choices = c(""),
+                                                      selected = "",
+                                                      multiple = FALSE),
+                                          
+                                          
+                                          # action button
+                                          actionButton("person_submit",
+                                                       display_text[89],
+                                                       class = "study-primary"),
+                                        ),
+                                        
+                                        # Main panel
+                                        study_main(
+                                          
+                                          # headline
+                                          h2(display_text[87], align = "center"),
+                                          
+                                          # information
+                                          tags$div(class = "study-privacy", HTML(display_text[58])),
+                                          
+                                          # table display here
+                                          DTOutput("selection_frame"),
+                                          
+                                          # Display the selected choice
+                                          textOutput("selected_choice"),
+                                          
+                                          # spacer
+                                          HTML("<br><br><br><br>"),
+                                          
+                                        )
+                                        
+                                        
                                ),
-
+                               
+                               
                                ##################################### DATA EXPLORATION PAGE ####
                                tabPanel(display_text[28],
                                         
