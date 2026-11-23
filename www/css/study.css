@@ -471,3 +471,75 @@ footer.page-footer .leibniz-logo-wrapper img { height: auto; }
   border: 0 !important;
   background: transparent !important;
 }
+
+/* Make the results filters readable at sidebar widths. */
+.study-sidebar .sw-checkbox-group-buttons-input .btn-group { gap: 8px; }
+.study-sidebar .sw-checkbox-group-buttons-input .btn-group > .checkbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-inline: 12px;
+  border: 1px solid var(--study-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--study-navy);
+  box-shadow: none;
+  text-align: start;
+}
+.study-sidebar .sw-checkbox-group-buttons-input .checkbtn::before {
+  content: "";
+  box-sizing: border-box;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:hover { border-color: var(--study-navy); }
+.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:checked),
+.study-sidebar .sw-checkbox-group-buttons-input input:checked + .checkbtn {
+  border-color: var(--study-navy);
+  background: var(--study-navy);
+  color: #fff;
+}
+.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:checked)::before,
+.study-sidebar .sw-checkbox-group-buttons-input input:checked + .checkbtn::before {
+  content: "✓";
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:focus-visible),
+.study-sidebar .sw-checkbox-group-buttons-input input:focus-visible + .checkbtn {
+  outline: 3px solid #1785bc;
+  outline-offset: 3px;
+}
+
+.study-sidebar .shiny-date-range-input .input-daterange {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.study-sidebar .input-daterange > .form-control {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 4px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.study-sidebar .input-daterange > .input-group-addon,
+.study-sidebar .input-daterange > .input-group-addon .input-group-text {
+  display: inline;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--study-muted);
+  font-size: 14px;
+}
