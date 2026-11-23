@@ -200,56 +200,24 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                ),
                                
                                ##################################### PARTICIPANT - USER SELECTION PAGE ####
-                               tabPanel(display_text[87],
-                                        
-                                        # Sidebar
-                                        study_sidebar(
-                                          
-                                          # Info text
-                                          h2(display_text[87], align = "center"),
-                                          HTML(display_text[90]),
-                                          
-                                          # spacer
-                                          HTML("<br><br>"),
-                                          
-                                          # input selector
-                                          selectInput("person_select",
-                                                      label = display_text[91],
-                                                      choices = c(""),
-                                                      selected = "",
-                                                      multiple = FALSE),
-                                          
-                                          
-                                          # action button
-                                          actionButton("person_submit",
-                                                       display_text[89],
-                                                       class = "study-primary"),
-                                        ),
-                                        
-                                        # Main panel
-                                        study_main(
-                                          
-                                          # headline
-                                          h2(display_text[87], align = "center"),
-                                          
-                                          # information
-                                          tags$div(class = "study-privacy", HTML(display_text[58])),
-                                          
-                                          # table display here
-                                          DTOutput("selection_frame"),
-                                          
-                                          # Display the selected choice
-                                          textOutput("selected_choice"),
-                                          
-                                          # spacer
-                                          HTML("<br><br><br><br>"),
-                                          
-                                        )
-                                        
-                                        
+                               tabPanel(
+                                 display_text[87],
+                                 tags$section(
+                                   class = "study-person-picker",
+                                   tags$h2(if (landing_page_language == "de") "Wer sind Sie im Chat?" else "Who are you in the chat?"),
+                                   tags$p(if (landing_page_language == "de") "Wählen Sie die Karte über Ihrem Namen aus." else "Select the card above your name."),
+                                   tags$p(
+                                     class = "study-person-privacy",
+                                     if (landing_page_language == "de") "Ihr Anzeigename dient hier zur Orientierung. In der Datenspende wird nur Ihre Kennung verwendet, zum Beispiel „Person_1“." else "Your display name helps you identify your card. The donation uses only your alias, such as Person_1."
+                                   ),
+                                   uiOutput("person_cards"),
+                                   shinyjs::disabled(
+                                     actionButton("person_submit", if (landing_page_language == "de") "Weiter" else "Continue",
+                                                  class = "study-primary")
+                                   )
+                                 )
                                ),
-                               
-                               
+
                                ##################################### DATA EXPLORATION PAGE ####
                                tabPanel(display_text[28],
                                         

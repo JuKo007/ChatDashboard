@@ -67,7 +67,10 @@ server <- function(input, output, session) {
   # Submitting uploaded data
   observeEvent(input$person_submit, {
     
-    # rerouting to 'explore data' tab and hiding upload tab
+    req(person_choice_valid())
+    rv$donor_alias <- input$person_select
+
+    # Open the donation review after confirming the participant alias.
     showTab("ChatDashboard",display_text[28],session = session)
     hideTab("ChatDashboard",display_text[87],session = session)
     updateNavbarPage(session, "ChatDashboard",display_text[28])
@@ -80,16 +83,10 @@ server <- function(input, output, session) {
   
   #### Hiding/unhiding buttons
   
-  # hiding "next" buttons conditional on action
-  shinyjs::hide("person_submit")
   observe({
-    
-    req(input$person_select)
-    
-    if (nchar(input$person_select) > 7) {
-      shinyjs::show("person_submit")}
+    shinyjs::toggleState("person_submit", condition = person_choice_valid())
   })
-  
+
   observe({
     shinyjs::hide("submit")
     
@@ -180,6 +177,8 @@ server <- function(input, output, session) {
     # show waiting animation
     waiter_show(html = waiting_screen1, color = "#1E8CC8")
     
+    rv$donor_alias <- NULL
+
     # parsing upload
     rv$data <- parse_chat(path = input$file$datapath,
                           anonymize = "add",
@@ -223,27 +222,54 @@ server <- function(input, output, session) {
   
   ################################### RENDERING DATAFRAME
   
-  # building user selection frame
-  output$selection_frame <- renderDT({
-    
-    # require necessary inputs
-    req(input$show_vars,rv$copy)
-    
-    # df
-    name_frame <- cbind.data.frame("Echter Name" = unique(rv$copy[,2][rv$copy[,2] != "WhatsApp System Message"]),"Anonymisierter Name" = unique(rv$copy[,3][rv$copy[,3] != "WhatsApp System Message"]))
-    
-    # table
-    datatable(name_frame)
-    
+  participants <- reactive({
+    chat <- rv$data
+    if (is.null(chat)) return(data.frame(name = character(), alias = character()))
+
+    people <- unique(data.frame(
+      name = as.character(chat[[2]]),
+      alias = as.character(chat[[3]])
+    ))
+    keep <- !is.na(people$name) & nzchar(people$name) &
+      !is.na(people$alias) & nzchar(people$alias) &
+      people$name != "WhatsApp System Message" &
+      people$alias != "WhatsApp System Message"
+    people[keep, , drop = FALSE]
   })
-  
-  # Reactive expression to get unique anonymized names
-  anonymized_names <- reactive({
-    req(rv$copy)
-    unique(rv$copy[, 3][rv$copy[, 3] != "WhatsApp System Message"])
+
+  person_choice_valid <- reactive({
+    selected <- input$person_select
+    length(selected) == 1L && !is.na(selected) && nzchar(selected) &&
+      selected %in% participants()$alias
   })
-  
-  
+
+  output$person_cards <- renderUI({
+    people <- participants()
+    if (!nrow(people)) {
+      return(tags$p(role = "status",
+                    if (landing_page_language == "de") "Im Chat wurden keine Personen gefunden." else "No participants were found in the chat."))
+    }
+
+    labels <- Map(function(name, alias) {
+      tags$span(
+        class = "study-person-option",
+        tags$span(
+          class = "study-person-card",
+          tags$span(class = "study-person-avatar", `aria-hidden` = "true", shiny::icon("user")),
+          tags$span(class = "study-person-alias", alias)
+        ),
+        tags$span(class = "study-person-name", name)
+      )
+    }, people$name, people$alias)
+
+    radioButtons(
+      "person_select",
+      label = if (landing_page_language == "de") "Person im Chat" else "Participant in the chat",
+      selected = character(0),
+      choiceNames = labels, choiceValues = people$alias, width = "100%"
+    )
+  })
+
   # rendering copy of the dataframe
   output$frame <- renderDT({
     
@@ -388,6 +414,7 @@ server <- function(input, output, session) {
   
   ################################### DATA DONATION ####
   observeEvent(input$donation, {
+    req(rv$donor_alias)
     # popup asking for consent to data donation
     shinyalert(display_text[81],
                "Ausgegraute Spalten werden automatisch von der Spende entfernt.",
@@ -407,6 +434,7 @@ server <- function(input, output, session) {
     
     # only execute if users confirm
     if (req(input$shinyalert) == TRUE) {
+      req(rv$donor_alias)
       
       # removing non-donateable columns if present
       if (sum(colnames(rv$data[as.numeric(rownames(rv$copy)), intersect(as.character(input$show_vars), colnames(rv$data)), drop = FALSE]
@@ -444,7 +472,7 @@ server <- function(input, output, session) {
       colnames(rv$data) <- rv$FunctionColnames
       
       # Add anonymized meta-information as attributes
-      attr(rv$copy2, "donor") <- input$person_select
+      attr(rv$copy2, "donor") <- rv$donor_alias
       attr(rv$copy2, "parsedAt") <- attributes(rv$copy)["parsedAt"]
       attr(rv$copy2, "language")  <- attributes(rv$copy)["language"]
       attr(rv$copy2, "detectedOS")  <- attributes(rv$copy)["detectedOS"]
@@ -585,12 +613,6 @@ server <- function(input, output, session) {
                                                   "color:black;font-weight: bold;",
                                                   "color:black;font-weight: bold;",
                                                   "color:black;font-weight: bold;")))
-    
-    ### Updating selection of donor
-    updateSelectInput(session,
-                      "person_select",
-                      choices = c("",unique(as.character(rv$data[,3][rv$data[,3] != "WhatsApp System Message"]))),
-                      selected = "")
     
     ### Updating all Sender selections for all analyses
     
