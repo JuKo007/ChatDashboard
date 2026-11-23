@@ -5,3 +5,5 @@ README.html
 .Rhistory
 .rhistory
 /WhatsR-build/
+/tools/webr-probe/runtime/
+/tools/webr-probe/packages/
