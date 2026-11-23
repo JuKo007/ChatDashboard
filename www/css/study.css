@@ -55,21 +55,31 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
   padding: clamp(18px, 4vw, 38px) var(--study-gutter);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   overflow-wrap: anywhere;
 }
 .page-banner.microsite .study-banner-title {
+  min-width: 0;
   margin: 0;
   color: white;
   font-size: clamp(23px, 4vw, 38px);
   line-height: 1.15;
 }
-.page-banner.microsite .microsite-logo {
+.page-banner.microsite .study-banner-logo {
+  display: grid;
   flex: 0 0 auto;
-  display: flex;
-  width: clamp(52px, 9vw, 96px);
-  height: auto;
+  place-items: center;
+  width: clamp(76px, 13vw, 128px);
   aspect-ratio: 1;
+  margin: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+.study-banner-logo img {
+  display: block;
+  width: 84%;
+  height: auto;
 }
 
 .gs-micro-nav { background: var(--study-navy); }
