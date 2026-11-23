@@ -1,5 +1,7 @@
 # ChatDashboard
 
+See [the application architecture](docs/architecture.md) for the source layout.
+
 ## Overview
 ChatDashboard is an R-shiny webapp allowing researchers to collect donated WhatsApp chat logs form consenting research participants. The webapp can be self-hosted and uses the `WhatsR` package to allow participants to securely upload their exported chat logs, parse them
 into an R-dataframe while extracting features of interest, select for themselves which parts of the data they want to donate, and gives them access to a dashboard with interactive visualizations after donating data. Participants can only donate anonymous or anonymized information and the webapp can be configured to automatically filter out chat participants that have not posted a consent message into the chat. All data is encrypted before being stored persistently on the server.
@@ -72,22 +74,16 @@ devtools::install_github("gesiscss/WhatsR")
 # Installing ChatDashboard Dependencies
 # code form: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
 Chatdashboard_dep <- c("anytime",
-                       "crosstalk",
                        "cyphr",
                        "digest",
                        "DT",
-                       "fontawesome",
                        "ggplot2",
-                       "ggwordcloud",
-                       "keyring",
                        "readODS",
-                       "rsconnect",
                        "shiny",
                        "shinymanager",
                        "shinythemes",
                        "shinyjs",
                        "shinyalert",
-                       "shinyTime",
                        "shinyWidgets",
                        "waiter",
                        "WhatsR")
@@ -150,7 +146,7 @@ identical(mtcars,decrypted_mtcars) # this should return TRUE
 If everything went smoothly, you can now copy the contents of the `Server_Keypair` folder into the `ServerFolder` of the ChatDashboard directory. This key pair will be used by ChatDashboard to encrypt files. You can decrypt them again using the key pair in the `Researcher_Keypair` folder. We suggest to never share these keys and keep them in a secure spot where you will definitely find them again.
 
 ### 4) Testing ChatDashboard (local)
-You can now open the `app.R` script in the ChatDashboard directory and see the code for the webapp. At the beginning of the file, there are several variables that you can define for yourself to customize the webapp according to your needs. For a first test run, we suggest to keep the default settings for now. You can simply click on `run app` on the top right of your Rstudio code panel to execute the webapp locally. This will open a browser window where you can log into the webapp using the preset combination of username and password found in `credentials.rds` ('TestUser', 'password'). The webapp then walks you through the data donation process from the perspective of a participant. You can either test the correct functioning of the webapp using a private chat log that you exported yourself or by creating an artificial one using `WhatsR::create_chatlog()`. You should be able to upload a chat, manually select what you want to donate, and see interactive visualizations. After closing the webapp, there should be an encrypted R dataframe object in the `UserData` folder, which can be decrypted with the key pair from the `Researcher_Keypair` folder we created in step 3.
+Open `R/setup.R` to find the study settings. There are several variables that you can define for yourself to customize the webapp according to your needs. For a first test run, we suggest to keep the default settings for now. You can simply click on `run app` on the top right of your Rstudio code panel to execute the webapp locally. This will open a browser window where you can log into the webapp using the preset combination of username and password found in `credentials.rds` ('TestUser', 'password'). The webapp then walks you through the data donation process from the perspective of a participant. You can either test the correct functioning of the webapp using a private chat log that you exported yourself or by creating an artificial one using `WhatsR::create_chatlog()`. You should be able to upload a chat, manually select what you want to donate, and see interactive visualizations. After closing the webapp, there should be an encrypted R dataframe object in the `UserData` folder, which can be decrypted with the key pair from the `Researcher_Keypair` folder we created in step 3.
 
 ### 5) Deploying to Server (online)
 If everything is running smoothly and without issues offline, you can deploy the webapp to the server. To do so, you need to install the necessary libraries and packages on the server as well (see step 1). Then, you can adapt the settings in `app.R` according to your needs by simply editing the script and saving it. After that, the app can be uploaded to the server. Some settings that you need or might want to adapt are:
