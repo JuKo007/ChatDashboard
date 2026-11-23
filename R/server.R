@@ -516,17 +516,8 @@ server <- function(input, output, session) {
       # NEW: Success popup
       shinyalert(
         inputId = "donation_success_alert",
-        title = if (isTRUE(save_to_server)) "Spende erfolgreich!" else "Auswahl abgeschlossen",
-        text = paste(
-          if (isTRUE(save_to_server)) {
-            "Vielen Dank! Ihre anonymisierte Datenspende wurde sicher übermittelt."
-          } else {
-            "Ihre Auswahl wurde nicht gespeichert."
-          },
-          "Auf der nächsten Seite sehen Sie Statistiken zu Ihrem Chatverhalten.",
-          "Sie können diese Website nun jederzeit schließen.",
-          sep = "\n\n"
-        ),
+        title = "Spende erfolgreich!", # Or use a display_text variable
+        text = "Vielen Dank! Ihre anonymisierte Datenspende wurde sicher übermittelt. \n\n Auf der nächsten Seite sehen Sie einige Statistiken zu Ihrem Chatverhalten als zusätzliches Dankeschön für Ihre Teilnahme. Diese sind nur für Sie einsehbar und werden mit Verlassen der Seite restlos gelöscht. \n\n Sie können diese Website nun jederzeit schließen.",
         type = "success",
         showConfirmButton = TRUE,
         confirmButtonText = "Weiter",
