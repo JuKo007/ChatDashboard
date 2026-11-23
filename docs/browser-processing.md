@@ -22,3 +22,23 @@ parity, including ZIP exports, timestamp handling, and the study's German
 message formats. Move row and field selection and results that use excluded
 data into the browser. Replace the Shiny upload path with a ciphertext-only
 endpoint. The research private key belongs outside the serving environment.
+
+## Encrypted subset format
+
+`www/js/donation-crypto.mjs` accepts serialized subset bytes and the study
+public key as SPKI DER. It returns a versioned JSON envelope. Each donation
+uses a fresh AES-256-GCM key and nonce. RSA-OAEP with SHA-256 wraps the AES key
+for the researcher. Run the interoperability check with Node.js 22 or later:
+
+```sh
+node tests/donation-crypto.mjs
+```
+
+Decrypt on a separate research machine with the matching RSA private key
+in PEM form. The decryptor refuses to overwrite an existing output.
+
+```sh
+node tools/decrypt-donation.mjs private-key.pem donation.json subset.bin
+```
+
+These components are not called by the active study application yet.
