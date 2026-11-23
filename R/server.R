@@ -620,29 +620,29 @@ server <- function(input, output, session) {
     # Defining list of names for sender to select so we can exclude WhatsApp System Messages
     rv$NameList <- unique(as.character(rv$data[,2]))
     
-    updateCheckboxGroupButtons(session,
+    updateCheckboxGroupInput(session,
                                "Sender_input_msg",
                                choices = rv$NameList[rv$NameList != "WhatsApp System Message"],
                                selected = rv$NameList[rv$NameList != "WhatsApp System Message"])
     
     
-    updateCheckboxGroupButtons(session,
+    updateCheckboxGroupInput(session,
                                "Sender_input_links",
                                choices = rv$NameList[rv$NameList != "WhatsApp System Message"],
                                selected = rv$NameList[rv$NameList != "WhatsApp System Message"])
     
-    updateCheckboxGroupButtons(session,
+    updateCheckboxGroupInput(session,
                                "Sender_input_smilies",
                                choices = rv$NameList[rv$NameList != "WhatsApp System Message"],
                                selected = rv$NameList[rv$NameList != "WhatsApp System Message"])
     
-    updateCheckboxGroupButtons(session,
+    updateCheckboxGroupInput(session,
                                "Sender_input_emoji",
                                choices = rv$NameList[rv$NameList != "WhatsApp System Message"],
                                selected = rv$NameList[rv$NameList != "WhatsApp System Message"])
     
     
-    updateCheckboxGroupButtons(session,
+    updateCheckboxGroupInput(session,
                                "Sender_input_replies",
                                choices = rv$NameList[rv$NameList != "WhatsApp System Message"],
                                selected = rv$NameList[rv$NameList != "WhatsApp System Message"])

@@ -325,9 +325,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                           # Sender selection
 
 
-                                                                          checkboxGroupButtons("Sender_input_msg",
-                                                                                               display_text[50],
-                                                                                               display_text[52]),
+                                                                          checkboxGroupInput("Sender_input_msg", display_text[50], choices = character(0)),
                                                                           
                                                                           # Time selection
 
@@ -387,9 +385,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                           # sender selection
 
 
-                                                                          checkboxGroupButtons("Sender_input_links",
-                                                                                               display_text[50],
-                                                                                               display_text[62]),
+                                                                          checkboxGroupInput("Sender_input_links", display_text[50], choices = character(0)),
                                                                           
                                                                           # timespan selection
 
@@ -456,9 +452,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                           # sender selection
 
 
-                                                                          checkboxGroupButtons("Sender_input_smilies",
-                                                                                               display_text[50],
-                                                                                               display_text[52]),
+                                                                          checkboxGroupInput("Sender_input_smilies", display_text[50], choices = character(0)),
                                                                           
                                                                           # time range selection
 
@@ -525,9 +519,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                           # sender selection
 
 
-                                                                          checkboxGroupButtons("Sender_input_emoji",
-                                                                                               display_text[50],
-                                                                                               display_text[62]),
+                                                                          checkboxGroupInput("Sender_input_emoji", display_text[50], choices = character(0)),
                                                                           
                                                                           # timeframe selection
 
@@ -599,9 +591,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                                           # sender selection
 
 
-                                                                          checkboxGroupButtons("Sender_input_replies",
-                                                                                               display_text[50],
-                                                                                               display_text[52]),
+                                                                          checkboxGroupInput("Sender_input_replies", display_text[50], choices = character(0)),
                                                                           
                                                                           # timeframe selection
 

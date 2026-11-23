@@ -136,7 +136,6 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
 .study-sidebar > h3:not(:first-child) { margin-top: 24px; }
 .study-intro, .study-contact { max-width: 800px; margin-inline: auto; }
 .study-intro-title h1 { margin-bottom: 22px; }
-.study-intro-copy { max-width: 70ch; }
 .study-intro-copy .study-prose { max-width: none; }
 .study-prose { max-width: 70ch; }
 .study-prose,
@@ -209,28 +208,36 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
 .study-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
 .bs3-fileinput .input-group {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   width: 100%;
 }
-.bs3-fileinput .input-group-btn { display: block; width: 100%; }
-.bs3-fileinput .input-group .form-control {
+.bs3-fileinput .input-group::before,
+.bs3-fileinput .input-group::after { content: none; }
+.bs3-fileinput .input-group > .input-group-btn,
+.bs3-fileinput .input-group > input.form-control {
+  display: block;
+  float: none;
   width: 100%;
-  border-radius: 8px;
+  min-width: 0;
+  margin: 0;
+}
+.bs3-fileinput .input-group > input.form-control {
+  border-radius: 8px !important;
   text-overflow: ellipsis;
 }
-.bs3-fileinput .btn-file {
+.bs3-fileinput .input-group .btn-file {
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
   background: var(--study-navy);
   color: white;
-  width: 100%;
-  justify-content: center;
-  border-radius: 8px;
+  border-radius: 8px !important;
   white-space: normal;
 }
 .bs3-fileinput .btn-file:focus-within { outline: 3px solid #1785bc; outline-offset: -3px; }
@@ -251,6 +258,8 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
   padding: 0;
   border: 0;
 }
+#study-export-platform::before,
+#study-export-platform::after { content: none; }
 #study-export-platform > li { float: none; margin: 0; padding: 0; }
 #study-export-platform > li > a {
   display: grid;
@@ -498,51 +507,44 @@ footer.page-footer .leibniz-logo-wrapper img { height: auto; }
   background: transparent !important;
 }
 
-/* Make the results filters readable at sidebar widths. */
-.study-sidebar .sw-checkbox-group-buttons-input .btn-group { gap: 8px; }
-.study-sidebar .sw-checkbox-group-buttons-input .btn-group > .checkbtn {
-  display: inline-flex;
+/* Results filters */
+.study-sidebar .shiny-input-checkboxgroup .shiny-options-group {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+.study-sidebar .shiny-input-checkboxgroup .checkbox { margin: 0; }
+.study-sidebar .shiny-input-checkboxgroup .checkbox > label {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding-inline: 12px;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
   border: 1px solid var(--study-border);
   border-radius: 8px;
   background: #fff;
   color: var(--study-navy);
-  box-shadow: none;
-  text-align: start;
+  cursor: pointer;
 }
-.study-sidebar .sw-checkbox-group-buttons-input .checkbtn::before {
-  content: "";
-  box-sizing: border-box;
+.study-sidebar .shiny-input-checkboxgroup .checkbox input[type="checkbox"] {
+  appearance: auto;
+  position: static;
+  opacity: 1;
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
-  border: 1px solid currentColor;
-  border-radius: 3px;
+  margin: 0;
+  accent-color: var(--study-navy);
 }
-.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:hover { border-color: var(--study-navy); }
-.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:checked),
-.study-sidebar .sw-checkbox-group-buttons-input input:checked + .checkbtn {
+.study-sidebar .shiny-input-checkboxgroup .checkbox > label:has(input:checked) {
   border-color: var(--study-navy);
-  background: var(--study-navy);
-  color: #fff;
-}
-.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:checked)::before,
-.study-sidebar .sw-checkbox-group-buttons-input input:checked + .checkbtn::before {
-  content: "✓";
-  font-size: 13px;
+  background: #eaf4fb;
   font-weight: 700;
-  line-height: 14px;
-  text-align: center;
 }
-.study-sidebar .sw-checkbox-group-buttons-input .checkbtn:has(input:focus-visible),
-.study-sidebar .sw-checkbox-group-buttons-input input:focus-visible + .checkbtn {
+.study-sidebar .shiny-input-checkboxgroup .checkbox > label:has(input:focus-visible) {
   outline: 3px solid #1785bc;
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
-
 .study-sidebar .shiny-date-range-input .input-daterange {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -550,22 +552,32 @@ footer.page-footer .leibniz-logo-wrapper img { height: auto; }
   gap: 6px;
   width: 100%;
 }
-.study-sidebar .input-daterange > .form-control {
+.study-sidebar .input-daterange::before,
+.study-sidebar .input-daterange::after { content: none; }
+.study-sidebar .shiny-date-range-input .input-daterange > input.form-control {
+  display: block;
+  float: none;
   width: 100%;
   min-width: 0;
+  margin: 0;
   padding-inline: 4px;
-  border-radius: 8px;
+  border-radius: 8px !important;
   text-align: center;
-  font-size: 14px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
 .study-sidebar .input-daterange > .input-group-addon,
 .study-sidebar .input-daterange > .input-group-addon .input-group-text {
-  display: inline;
+  display: block;
   width: auto;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--study-muted);
   font-size: 14px;
+}
+@media (max-width: 350px) {
+  .study-sidebar .shiny-date-range-input .input-daterange {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
