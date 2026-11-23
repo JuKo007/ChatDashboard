@@ -57,19 +57,10 @@ on your local machine. Depending on what is already installed, you might get war
 #libharfbuzz-dev
 #libfribidi-dev
 #libjpeg-dev
-#default-jre
-#default-jdk
 #gfortran
 #libblas-dev
 #liblapack-dev
 #libgdal-dev
-
-# Installing from CRAN
-install.packages("WhatsR")
-
-# Installing WhatsR package from GitHub
-library(devtools)
-devtools::install_github("gesiscss/WhatsR")
 
 # Installing ChatDashboard Dependencies
 # code form: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
@@ -86,12 +77,14 @@ Chatdashboard_dep <- c("anytime",
                        "shinyalert",
                        "shinyWidgets",
                        "waiter",
-                       "WhatsR")
+                       "shinybrowser")
                        
 Chatdashboard_new <- Chatdashboard_dep[!(Chatdashboard_dep %in% installed.packages()[,"Package"])]
 if(length(Chatdashboard_new)) install.packages(Chatdashboard_new)
 
 ```
+
+Install the [Java-free WhatsR build](docs/whatsr.md) before starting the app.
 
 ### 2) Downloading ChatDashboard (local)
 If you have not already done so, download the complete ChatDashboard folder to your local PC first. The goal is to test the setup

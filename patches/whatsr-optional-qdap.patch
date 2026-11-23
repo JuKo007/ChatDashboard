@@ -1,0 +1,94 @@
+diff --git a/DESCRIPTION b/DESCRIPTION
+index b900914..d49e788 100644
+--- a/DESCRIPTION
++++ b/DESCRIPTION
+@@ -12,11 +12,11 @@ Description: Imports 'WhatsApp' chat logs and parses them into
+     media files from the messages, extracting timestamps from messages, extracting and anonymizing author 
+     names from messages. Can be used to create anonymized versions of data.
+ License: GPL-3
+-Imports: stringi, qdapRegex, readr, tokenizers, data.table, ggplot2, anytime, mgsub, stats, qdap, ggwordcloud, dplyr, ragg, checkmate, visNetwork, lubridate, methods, leaflet
++Imports: stringi, qdapRegex, readr, tokenizers, data.table, ggplot2, anytime, mgsub, stats, ggwordcloud, dplyr, ragg, checkmate, visNetwork, lubridate, methods, leaflet
+ Encoding: UTF-8
+ LazyData: true
+ RoxygenNote: 7.3.3
+-Suggests: extrafont, tm,
++Suggests: extrafont, tm, qdap,
+     testthat (>= 3.0.0)
+ Config/testthat/edition: 3
+ URL: https://gesiscss.github.io/WhatsR/, https://github.com/gesiscss/WhatsR
+diff --git a/NAMESPACE b/NAMESPACE
+index ec3e27b..389843a 100644
+--- a/NAMESPACE
++++ b/NAMESPACE
+@@ -48,8 +48,6 @@ importFrom(leaflet,setView)
+ importFrom(lubridate,parse_date_time)
+ importFrom(methods,is)
+ importFrom(mgsub,mgsub)
+-importFrom(qdap,dispersion_plot)
+-importFrom(qdap,term_match)
+ importFrom(qdapRegex,ex_emoticon)
+ importFrom(qdapRegex,rm_between)
+ importFrom(qdapRegex,rm_default)
+diff --git a/R/plot_lexical_dispersion.R b/R/plot_lexical_dispersion.R
+index f85d565..4a99879 100644
+--- a/R/plot_lexical_dispersion.R
++++ b/R/plot_lexical_dispersion.R
+@@ -10,14 +10,14 @@
+ #' @param ... Further arguments passed down to \code{\link[qdap]{dispersion_plot}}.
+ #' @import ggplot2
+ #' @importFrom anytime anytime
+-#' @importFrom qdap term_match
+-#' @importFrom qdap dispersion_plot
+ #' @importFrom methods is
+ #' @export
+ #' @return Lexical Dispersion plots for specified keywords
+ #' @examples
+-#' data <- readRDS(system.file("ParsedWhatsAppChat.rds", package = "WhatsR"))
+-#' plot_lexical_dispersion(data, keywords = c("auch"))
++#' if (requireNamespace("qdap", quietly = TRUE)) {
++#'   data <- readRDS(system.file("ParsedWhatsAppChat.rds", package = "WhatsR"))
++#'   plot_lexical_dispersion(data, keywords = c("auch"))
++#' }
+ 
+ ######################## lexical dispersion plots for specific words
+ plot_lexical_dispersion <- function(data,
+@@ -28,6 +28,9 @@ plot_lexical_dispersion <- function(data,
+                                     return_data = FALSE,
+                                     exclude_sm = FALSE,
+                                     ...) {
++  if (!requireNamespace("qdap", quietly = TRUE)) {
++    stop("Lexical dispersion plots require the optional 'qdap' package.", call. = FALSE)
++  }
+ 
+   # First of all, we assign local variable with NULL to prevent package build error: https://www.r-bloggers.com/no-visible-binding-for-global-variable/
+   `keyword` <- NULL
+@@ -91,12 +94,12 @@ plot_lexical_dispersion <- function(data,
+   data <- data[is.element(data$Sender, names) & data$DateTime >= starttime & data$DateTime <= endtime, ]
+ 
+   # Checking if keywords are contained in flattened message
+-  if (length(unlist(term_match(data$Flat, keywords))) == 0) {
++  if (length(unlist(qdap::term_match(data$Flat, keywords))) == 0) {
+     stop("Keyword is not contained in the chat, try another keyword")
+   }
+ 
+   # make plot
+-  out <- with(data, suppressWarnings(dispersion_plot(Flat, keywords, grouping.var = list(Sender), ...)))
++  out <- with(data, suppressWarnings(qdap::dispersion_plot(Flat, keywords, grouping.var = list(Sender), ...)))
+   print(out)
+ 
+   if (return_data == TRUE) {
+diff --git a/man/plot_lexical_dispersion.Rd b/man/plot_lexical_dispersion.Rd
+index 83f48f9..a63be7f 100644
+--- a/man/plot_lexical_dispersion.Rd
++++ b/man/plot_lexical_dispersion.Rd
+@@ -39,6 +39,8 @@ Lexical Dispersion plots for specified keywords
+ Visualizes the occurrence of specific keywords within the chat. Requires the raw message content to be contained in the preprocessed data
+ }
+ \examples{
+-data <- readRDS(system.file("ParsedWhatsAppChat.rds", package = "WhatsR"))
+-plot_lexical_dispersion(data, keywords = c("auch"))
++if (requireNamespace("qdap", quietly = TRUE)) {
++  data <- readRDS(system.file("ParsedWhatsAppChat.rds", package = "WhatsR"))
++  plot_lexical_dispersion(data, keywords = c("auch"))
++}
+ }
