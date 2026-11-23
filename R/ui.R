@@ -103,10 +103,10 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                  tags$section(
                                    class = "study-intro",
                                    tags$header(class = "study-intro-title", HTML(display_text[4])),
-                                   tags$div(class = "study-prose",
-                                            HTML(display_text[5]),
-                                            HTML(display_text[6]),
-                                            HTML(display_text[7])),
+                                   tags$div(class = "study-prose", lang = landing_page_language,
+                                            tags$p(HTML(display_text[5])),
+                                            tags$p(HTML(display_text[6])),
+                                            tags$p(HTML(display_text[7]))),
                                    tags$div(class = "callout",
                                             tags$strong("Wichtig"),
                                             tags$p("Lassen Sie diese Seite während der Datenspende geöffnet, damit Ihre Verbindung erhalten bleibt.")),
@@ -122,9 +122,8 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           study_sidebar(h2(display_text[16],
                                                           align = "center"),
                                                        
-                                                       # Text for sidebar panel
-                                                       helpText(display_text[18]),
-                                                       helpText(display_text[19]),
+                                                       tags$p("Wählen Sie Ihren WhatsApp-Export (.txt oder .zip)."),
+                                                       tags$p("Sie können die Daten vor der Spende prüfen und auswählen."),
                                                        
                                                        # File selection field
                                                        div(class = "bs3-fileinput",
@@ -147,12 +146,12 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                               
                                               # Heading + body text
                                               tags$h2("WhatsApp Chatverläufe exportieren"),
-                                              tags$p("Wenn Sie den Chatverlauf bereits auf ihr Telefon oder Ihren PC exportiert haben können Sie diesen direkt links (PC) oder oben (Smartphone) hochladen. Falls nicht, klicken Sie hier auf den entsprechenden Reiter unten um die richtige Anleitung zum Export von WhatsApp Chatverläufen für Ihr Telefon auszuwählen."),
+                                              tags$p(class = "study-prose", lang = "de", "Wenn Ihr Export schon vorliegt, können Sie die Datei direkt auswählen. Sonst öffnen Sie die Anleitung für Ihr Smartphone."),
                                               
                                               # ANDROID
                                               tags$details(
                                                 tags$summary("Android"),
-                                                tags$ul(
+                                                tags$ol(
                                                   tags$li("Öffnen Sie WhatsApp auf Ihrem Smartphone und klicken Sie auf den Chat, dessen Verlauf Sie bereitstellen möchten."),
                                                   tags$li("Klicken Sie oben rechts im Chat auf die drei vertikalen Punkte."),
                                                   tags$li("Wählen Sie die Option `Mehr` im folgenden Menü aus."),
@@ -163,7 +162,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                 ),
                                                 tags$img(src = "DataExport_Guide_Android.png",
                                                          style = "width:100%;height:auto;", alt = "Android export guide"),
-                                                tags$ul(
+                                                tags$ol(start = 8,
                                                   tags$li("Öffnen Sie das E-mail Postfach an welches Sie den Chatverlauf gerade geschickt haben."),
                                                   tags$li("Laden Sie den Anhang der E-mail herunter. Dies kann entweder eine .zip Datei oder eine .txt Datei sein."),
                                                   tags$li("Laden Sie den heruntergeladenen Chatverlauf im Fenster links (PC), bzw. oben (Smartphone,) auf diese Website hoch."),
@@ -174,7 +173,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                               # iPHONE
                                               tags$details(
                                                 tags$summary("iPhone"),
-                                                tags$ul(
+                                                tags$ol(
                                                   tags$li("Öffnen Sie WhatsApp auf Ihrem Smartphone und klicken Sie auf den Chat dessen Verlauf Sie bereitstellen möchten."),
                                                   tags$li("Klicken Sie oben in der Mitte des Chatfensters auf den Namen Ihres Chatpartners."),
                                                   tags$li("Scrollen Sie im Menü nach unten und wählen Sie die Option `Chat exportieren` aus"),
@@ -184,7 +183,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                 ),
                                                 tags$img(src = "WhatsApp_DataExport_iOS.png",
                                                          style = "width:100%;height:auto;", alt = "iOS export guide"),
-                                                tags$ul(
+                                                tags$ol(start = 7,
                                                   tags$li("Öffnen Sie das E-mail Postfach an welches Sie den Chatverlauf gerade geschickt haben."),
                                                   tags$li("Laden Sie den Anhang der E-mail herunter. Dies kann entweder eine .zip Datei oder eine .txt Datei sein."),
                                                   tags$li("Laden Sie den heruntergeladenen Chatverlauf im Fenster links (PC), bzw. oben (Smartphone,) auf diese Website hoch."),
@@ -201,56 +200,28 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                ),
                                
                                ##################################### PARTICIPANT - USER SELECTION PAGE ####
-                               tabPanel(display_text[87],
-                                        
-                                        # Sidebar
-                                        study_sidebar(
-                                          
-                                          # Info text
-                                          h2(display_text[87], align = "center"),
-                                          HTML(display_text[90]),
-                                          
-                                          # spacer
-                                          HTML("<br><br>"),
-                                          
-                                          # input selector
-                                          selectInput("person_select",
-                                                      label = display_text[91],
-                                                      choices = c(""),
-                                                      selected = "",
-                                                      multiple = FALSE),
-                                          
-                                          
-                                          # action button
-                                          actionButton("person_submit",
-                                                       display_text[89],
-                                                       class = "study-primary"),
-                                        ),
-                                        
-                                        # Main panel
-                                        study_main(
-                                          
-                                          # headline
-                                          h2(display_text[87], align = "center"),
-                                          
-                                          # information
-                                          tags$div(class = "study-privacy", HTML(display_text[58])),
-                                          
-                                          # table display here
-                                          DTOutput("selection_frame"),
-                                          
-                                          # Display the selected choice
-                                          textOutput("selected_choice"),
-                                          
-                                          # spacer
-                                          HTML("<br><br><br><br>"),
-                                          
-                                        )
-                                        
-                                        
+                               tabPanel(
+                                 display_text[87],
+                                 tags$section(
+                                   class = "study-participant",
+                                   tags$h2("Wer sind Sie im Chat?"),
+                                   tags$p("Wählen Sie Ihren Namen so aus, wie er im Chat angezeigt wird."),
+                                   selectizeInput(
+                                     "person_select", "Ihr Name im Chat",
+                                     choices = NULL, width = "100%",
+                                     options = list(
+                                       placeholder = "Namen auswählen oder suchen",
+                                       openOnFocus = TRUE
+                                     )
+                                   ),
+                                   tags$p(class = "study-participant-note",
+                                          "Für die Datenspende wird nur Ihre Kennung (z. B. Person_1) verwendet."),
+                                   shinyjs::disabled(
+                                     actionButton("person_submit", display_text[89], class = "study-primary")
+                                   )
+                                 )
                                ),
-                               
-                               
+
                                ##################################### DATA EXPLORATION PAGE ####
                                tabPanel(display_text[28],
                                         
@@ -265,7 +236,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           
                                           # column selection
                                           h3(display_text[32]),
-                                          helpText(display_text[33]),
+                                          tags$p("Wählen Sie aus, welche Spalten Sie prüfen möchten. Grau markierte Spalten werden nicht gespendet."),
                                           pickerInput("show_vars",
                                                       display_text[34],
                                                       choices = c(""),
@@ -299,13 +270,17 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           
                                           # Row selection
                                           h3(display_text[36]),
-                                          helpText(display_text[37]),
+                                          tags$ol(
+                                            tags$li("Markieren Sie die Zeilen in der Tabelle."),
+                                            tags$li("Klicken Sie auf „Zeile(n) ausschließen“.")
+                                          ),
+                                          tags$p("„Zeilen wiederherstellen“ macht die Ausschlüsse rückgängig."),
                                           actionButton("excludeRows",display_text[38]),
                                           actionButton("RestoreRows",display_text[39]),
                                           
                                           # Data donation
                                           h3(display_text[40]),
-                                          helpText(display_text[41]),
+                                          tags$p("Prüfen Sie Ihre Auswahl, bevor Sie die Spende bestätigen."),
                                           actionButton(inputId = "donation",
                                                        label = display_text[42],
                                                        class = "study-primary")
@@ -320,7 +295,7 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                           h1(display_text[43],align = "center"),
                                           
                                           # Dataframe
-                                          DTOutput("frame"),
+                                          tags$div(class = "study-donation-table", DTOutput("frame")),
                                           
                                           # Download buttons
                                           tags$div(class = "study-downloads",

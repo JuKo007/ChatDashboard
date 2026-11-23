@@ -124,6 +124,57 @@ body > .container-fluid:has(> .study-shell) { padding: 0; }
 .study-intro, .study-contact { max-width: 800px; margin-inline: auto; }
 .study-intro-title h1 { margin-bottom: 22px; }
 .study-prose { max-width: 70ch; }
+.study-prose,
+.study-prose p {
+  text-align: justify;
+  hyphens: auto;
+}
+.study-participant {
+  max-width: 600px;
+  margin-inline: auto;
+  padding: clamp(18px, 4vw, 40px);
+  background: #fff;
+  border: 1px solid var(--study-border);
+  border-radius: 12px;
+}
+.study-participant h2 { margin-top: 0; }
+.study-participant .selectize-input {
+  min-height: 48px;
+  padding: 12px;
+  border-color: var(--study-border);
+}
+.study-participant .selectize-dropdown .option {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  overflow-wrap: anywhere;
+}
+.study-participant .study-participant-note { color: var(--study-muted); }
+.study-export-guide ol, .study-sidebar ol { padding-inline-start: 1.6em; }
+.study-export-guide ol li, .study-sidebar ol li { margin-block: .45em; }
+
+/* Keep supporting panels readable while giving the review table the extra width. */
+.study-shell > .container-fluid > .tab-content:has(.tab-pane.active .study-donation-table),
+.study-shell > .tab-content:has(.tab-pane.active .study-donation-table) {
+  max-width: 1800px;
+}
+.study-donation-table table.dataTable th {
+  min-width: 8ch;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.study-donation-table table.dataTable td {
+  min-width: 8ch;
+  max-width: 26ch;
+  vertical-align: top;
+}
+.study-donation-table table.dataTable td:first-child,
+.study-donation-table table.dataTable th:first-child { min-width: 3ch; }
+.study-donation-table td details { min-width: 18ch; }
+.study-donation-table td details summary { cursor: pointer; }
+.study-donation-table td details > div { white-space: pre-wrap; }
+.study-donation-table td details[open] summary { margin-bottom: 6px; }
 .study-intro .callout, .study-privacy {
   background: #eaf4fb;
   border-inline-start: 4px solid var(--study-navy);
@@ -294,3 +345,5 @@ footer.page-footer .leibniz-logo-wrapper img { height: auto; }
   .study-shell .dataTables_wrapper .dataTables_filter input { max-width: 100%; }
   .study-downloads .btn { flex: 1 1 100%; }
 }
+
+.study-donation-table table.dataTable td.study-timestamp { white-space: nowrap; }

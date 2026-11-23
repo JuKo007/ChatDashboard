@@ -67,7 +67,10 @@ server <- function(input, output, session) {
   # Submitting uploaded data
   observeEvent(input$person_submit, {
     
-    # rerouting to 'explore data' tab and hiding upload tab
+    req(input$person_select, input$person_select %in% participant_choices())
+    rv$donor_alias <- input$person_select
+
+    # Open the donation review after a valid participant selection.
     showTab("ChatDashboard",display_text[28],session = session)
     hideTab("ChatDashboard",display_text[87],session = session)
     updateNavbarPage(session, "ChatDashboard",display_text[28])
@@ -81,13 +84,10 @@ server <- function(input, output, session) {
   #### Hiding/unhiding buttons
   
   # hiding "next" buttons conditional on action
-  shinyjs::hide("person_submit")
   observe({
-    
-    req(input$person_select)
-    
-    if (nchar(input$person_select) > 7) {
-      shinyjs::show("person_submit")}
+    selected <- input$person_select
+    shinyjs::toggleState("person_submit", condition =
+      length(selected) == 1L && nzchar(selected) && selected %in% participant_choices())
   })
   
   observe({
@@ -180,6 +180,8 @@ server <- function(input, output, session) {
     # show waiting animation
     waiter_show(html = waiting_screen1, color = "#1E8CC8")
     
+    rv$donor_alias <- NULL
+
     # parsing upload
     rv$data <- parse_chat(path = input$file$datapath,
                           anonymize = "add",
@@ -223,27 +225,32 @@ server <- function(input, output, session) {
   
   ################################### RENDERING DATAFRAME
   
-  # building user selection frame
-  output$selection_frame <- renderDT({
-    
-    # require necessary inputs
-    req(input$show_vars,rv$copy)
-    
-    # df
-    name_frame <- cbind.data.frame("Echter Name" = unique(rv$copy[,2][rv$copy[,2] != "WhatsApp System Message"]),"Anonymisierter Name" = unique(rv$copy[,3][rv$copy[,3] != "WhatsApp System Message"]))
-    
-    # table
-    datatable(name_frame)
-    
+  participant_choices <- reactive({
+    chat <- rv$data
+    if (is.null(chat)) return(character())
+
+    participants <- unique(data.frame(
+      name = as.character(chat[[2]]), alias = as.character(chat[[3]])
+    ))
+    participants <- participants[
+      !is.na(participants$name) & nzchar(participants$name) &
+        !is.na(participants$alias) & nzchar(participants$alias) &
+        participants$name != "WhatsApp System Message" &
+        participants$alias != "WhatsApp System Message", ,
+      drop = FALSE
+    ]
+    participants <- participants[order(participants$name, participants$alias), , drop = FALSE]
+    labels <- participants$name
+    repeated <- duplicated(labels) | duplicated(labels, fromLast = TRUE)
+    labels[repeated] <- paste0(labels[repeated], " (", participants$alias[repeated], ")")
+    stats::setNames(participants$alias, labels)
   })
-  
-  # Reactive expression to get unique anonymized names
-  anonymized_names <- reactive({
-    req(rv$copy)
-    unique(rv$copy[, 3][rv$copy[, 3] != "WhatsApp System Message"])
+
+  observeEvent(participant_choices(), {
+    updateSelectizeInput(session, "person_select", choices = participant_choices(),
+                         selected = "", server = FALSE)
   })
-  
-  
+
   # rendering copy of the dataframe
   output$frame <- renderDT({
     
@@ -255,18 +262,40 @@ server <- function(input, output, session) {
       
       preview <- rv$copy[, input$show_vars, drop = FALSE]
       excluded <- intersect(names(preview), Colnames_exclude_pii)
+      time_column <- match("Zeit", names(preview))
       table <- datatable(
         preview,
+        colnames = gsub("_", " ", names(preview), fixed = TRUE),
         escape = TRUE,
         options = list(
           scrollX = TRUE,
           autoWidth = FALSE,
+          columnDefs = if (!is.na(time_column)) {
+            list(list(targets = time_column, className = "study-timestamp"))
+          },
+          rowCallback = JS(
+            "function(row) {",
+            "  row.querySelectorAll('td').forEach(function(cell) {",
+            "    if (cell.firstElementChild) return;",
+            "    const value = cell.textContent;",
+            "    if (Array.from(value).length <= 100) return;",
+            "    const details = document.createElement('details');",
+            "    const summary = document.createElement('summary');",
+            "    const full = document.createElement('div');",
+            "    summary.textContent = Array.from(value).slice(0, 90).join('') + '…';",
+            "    full.textContent = value;",
+            "    details.append(summary, full);",
+            "    details.addEventListener('click', function(event) { event.stopPropagation(); });",
+            "    cell.replaceChildren(details);",
+            "  });",
+            "}"
+          ),
           ordering = FALSE,
           language = list(url = datatable_language)
         )
       )
       if (length(excluded) > 0L) {
-        table <- formatStyle(table, excluded, backgroundColor = "#edf0f3")
+        table <- formatStyle(table, match(excluded, names(preview)), backgroundColor = "#edf0f3")
       }
       table
 
@@ -366,7 +395,8 @@ server <- function(input, output, session) {
   
   ################################### DATA DONATION ####
   observeEvent(input$donation, {
-    
+    req(rv$donor_alias)
+
     # popup asking for consent to data donation
     shinyalert(display_text[81],
                "Ausgegraute Spalten werden automatisch von der Spende entfernt.",
@@ -423,7 +453,7 @@ server <- function(input, output, session) {
       colnames(rv$data) <- rv$FunctionColnames
       
       # Add anonymized meta-information as attributes
-      attr(rv$copy2, "donor") <- input$person_select
+      attr(rv$copy2, "donor") <- rv$donor_alias
       attr(rv$copy2, "parsedAt") <- attributes(rv$copy)["parsedAt"]
       attr(rv$copy2, "language")  <- attributes(rv$copy)["language"]
       attr(rv$copy2, "detectedOS")  <- attributes(rv$copy)["detectedOS"]
@@ -564,12 +594,6 @@ server <- function(input, output, session) {
                                                   "color:black;font-weight: bold;",
                                                   "color:black;font-weight: bold;",
                                                   "color:black;font-weight: bold;")))
-    
-    ### Updating selection of donor
-    updateSelectInput(session,
-                      "person_select",
-                      choices = c("",unique(as.character(rv$data[,3][rv$data[,3] != "WhatsApp System Message"]))),
-                      selected = "")
     
     ### Updating all Sender selections for all analyses
     
