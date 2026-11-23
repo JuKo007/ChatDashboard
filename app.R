@@ -18,7 +18,6 @@ library(shinyjs)
 library(shinyalert)
 library(shinyTime)
 library(shinyWidgets)
-library(slickR)
 library(utils)
 library(waiter)
 library(WhatsR)
@@ -415,13 +414,6 @@ app_ui <- fluidPage(theme = shinytheme("flatly"),
                                                  HTML(display_text[7]),
                                                  HTML("<br>"),
                                               
-                                          
-                                          # Images
-                                          #column(slickROutput("slickr",
-                                          #                    width = "100%",
-                                          #                    height = "100%"),
-                                          #       HTML("<br><br>"),
-                                          #       width = 6, offset = 3),
                                           
                                           # Heading 2
                                           #column(tags$p(style = "text-align: justify;",
@@ -1125,12 +1117,6 @@ server <- function(input, output, session) {
   observeEvent(input$keepalive, function(...) {}, ignoreInit = TRUE)
   
   ################################### BASIC SETUP ####
-  
-  #### Creating Slideshow with SlickR
-  output$slickr <- renderSlickR({
-    imgs <- list.files("./www/Slideshow", pattern = ".png", full.names = TRUE)
-    slickR(imgs)
-  })
   
   # creating empty reactive value for storing uploaded data
   rv <- reactiveValues(data = NULL)

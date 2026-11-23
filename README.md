@@ -89,7 +89,6 @@ Chatdashboard_dep <- c("anytime",
                        "shinyalert",
                        "shinyTime",
                        "shinyWidgets",
-                       "slickR",
                        "waiter",
                        "WhatsR")
                        
